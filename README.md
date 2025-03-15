@@ -103,7 +103,7 @@ El elemento fundamental es el microprocesador que puede generar señales al exte
 ### 3.2 Instalación de Arduino IDE
 Para programar Arduino necesitas instalar el entorno de desarrollo integrado (IDE) de Arduino. Sigue los siguientes pasos para instalar Arduino IDE en tu ordenador:   
 1.	Descarga el instalador de Arduino IDE desde la página oficial de Arduino: https://www.arduino.cc/en/software
-Para windows, descarga el instalador de MSI Installer
+(para windows, descarga el instalador de MSI Installer)
 2. Ejecuta el instalador y sigue las instrucciones del asistente de instalación. Es importante marcar la opción de “Install USB driver” para que el sistema operativo pueda reconocer la placa Arduino.
 
 ### 3.3 Configuración de Arduino IDE
