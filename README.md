@@ -423,7 +423,7 @@ DButton.grid(row=2, column=3, padx=5, pady=5, sticky=N + S + E + W)
 
 window.mainloop()
 ```
-<img  src="https://github.com/user-attachments/assets/0b2ad25e-4c7f-4717-9e8a-a44bcbc6b3d1" width="400" height="400"/>
+<img  src="https://github.com/user-attachments/assets/0b2ad25e-4c7f-4717-9e8a-a44bcbc6b3d1" width="200" height="200"/>
 
 
 
