@@ -363,7 +363,7 @@ Quizá ahora es buena idea añadir algo más de código al test unitario de comu
 ### Paso 8: Presentar los datos de temperatura y humedad al usuario
 Tenemos ya encima de la mesa todos los elementos necesarios para construir un sistema en el que el Arduino satélite capte los datos de temperatura y humedad y los envíe a tierra (por cable) cada 3 segundos, de manera que esos datos aparezcan en la consola del programa en Python para que pueda verlos el usuario. Además, el Arduino satélite debe tener un led verde que se encienda durante un breve instante cada vez que se envían datos y el Arduino de tierra también un led verde que se enciende cada vez que recibe nuevos datos.    
 
-### Paso 8: Una gráfica dinámica con los datos de temperatura
+### Paso 9: Una gráfica dinámica con los datos de temperatura
 La forma ideal de presentar al usuario los datos de temperatura es mediante una gráfica que muestre cómo evolucionan esos datos a lo largo del tiempo. Para ello podemos usar la librería _matplotlib_ de Python. Veamos cómo hacerlo.   
   
 Para empezar, haremos que el satélite envíe los datos en un formato que resulte fácil de procesar en tierra. Por ejemplo, el mensaje podría ser:    
@@ -381,6 +381,49 @@ En el vídeo siguiente se muestra cómo incorporar una gráfica al programa en P
 [![](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D_fIoPHwnay0)](https://www.youtube.com/watch?v=_fIoPHwnay0)
    
 
+### Paso 10: Una interfaz gráfica más amigable
+El programa Python debe presentar al usuario una interfaz gráfica lo más amigable posible (con botones, colores, etc.). Aunque de momento la interacción entre el programa Python y el usuario es mínima, vamos a ver ya cómo crear una interfaz gráfica más amigable a la que iremos añadiendo funcionalidades a medida que vayan aumentando las necesodades de interacción con el usuario.   
+Para hacer la interfaz gráfica usaremos la librería Tkinter, que ya viene por defecto incorporada al intérprete de Python. El programa siguiente crea la interfaz gráfica que se muestra en la figura.   
+```
+from tkinter import *
+
+def EntrarClick ():
+    print ('Has introducido la frase --- ' + fraseEntry.get() + ' --- y has pulsado el botón entrar')
+
+def AClick ():
+    print ('Has pulsado el botón A')
+
+window = Tk()
+window.geometry("400x400")
+window.rowconfigure(0, weight=1)
+window.rowconfigure(1, weight=1)
+window.rowconfigure(2, weight=1)
+window.columnconfigure(0, weight=1)
+window.columnconfigure(1, weight=1)
+window.columnconfigure(2, weight=1)
+window.columnconfigure(3, weight=1)
+
+tituloLabel = Label(window, text = "Mi programa", font=("Courier", 20, "italic"))
+tituloLabel.grid(row=0, column=0, columnspan=5, padx=5, pady=5, sticky=N + S + E + W)
+
+fraseEntry = Entry(window)
+fraseEntry.grid(row=1, column=0, columnspan = 3, padx=5, pady=5, sticky=N + S + E + W)
+
+EntrarButton = Button(window, text="Entrar", bg='red', fg="white",command=EntrarClick)
+EntrarButton.grid(row=1, column=3, padx=5, pady=5, sticky=N + S + E + W)
+
+AButton = Button(window, text="A", bg='red', fg="white",command=AClick)
+AButton.grid(row=2, column=0, padx=5, pady=5, sticky=N + S + E + W)
+BButton = Button(window, text="B", bg='yellow', fg="black")
+BButton.grid(row=2, column=1, padx=5, pady=5, sticky=N + S + E + W)
+CButton = Button(window, text="C", bg='blue', fg="white")
+CButton.grid(row=2, column=2, padx=5, pady=5, sticky=N + S + E + W)
+DButton = Button(window, text="D", bg='orange', fg="black")
+DButton.grid(row=2, column=3, padx=5, pady=5, sticky=N + S + E + W)
+
+window.mainloop()
+```
+<img  src="https://github.com/user-attachments/assets/0b2ad25e-4c7f-4717-9e8a-a44bcbc6b3d1" width="400" height="400"/>
 
 
 
