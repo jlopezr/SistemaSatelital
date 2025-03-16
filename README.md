@@ -473,6 +473,9 @@ El siguiente paso es retocar los códigos del Arduino de tierra para que transmi
 
 El código para el Arduino satélite es algo más complicado. Se trata de añadir una variable booleana (solo puede valer _true_ o _false_) que indique si debe o no enviar los datos cuando llegue el momento de hacerlo. Supongamos que llamamos a esa variable _enviarDatos_, que inicialmente tendrá el valor _true_. Por otra parte, tiene que estar pendiente de los mensajes que puedan llegar por mySerial (procedentes del Arduino de tierra) de manera que si el mensaje recibido es "Parar" pondrá la variable _enviarDatos_ a _false_ y si llega el mensaje "Reanudar" volverá a poner la palabra a _true_. Trata de hacer estos cambios y comprueba que el sistema funciona correctamente.   
 
+### Paso 12: Incrustar la gráfica dinámica en la interfaz gráfica
+
+### Paso 13: Alarmas
 
 
 
