@@ -326,7 +326,7 @@ void loop() {
       Serial.print(data);
    }
 }
-´´´
+```
 El receptor también va a usar la libreria _SoftwareSerial_. Crea el canal _mySerial_ para las comunicaciones serie, también usando los pines 10 y 11 como RX y TX respectivamente, y especifica la velocidad de comunicación, que debe coincidir con la establecida por el transmisor.
  
 La función _mySerial.available()_ indica si se han recibido nuevos bytes por el canal serie. En caso afirmativo se leen todos los bytes hasta el carácter de fin de línea, usando la función _mySerial.readString()_.
@@ -335,6 +335,49 @@ Puesto que queremos que la frase recibida se pueda ver el monitor serie del IDE 
 
 Llegados a este punto, es fácil añadir a los programas del transmisor y del receptor el código necesario para que haya comunicación en ambos sentidos. Por ejemplo, el receptor puede enviar una frase de agradecimiento al transmisor cada vez que recibe un nuevo mensaje. Naturalmente, el transmisor enviará la frase recibida al monitor serie del IDE correspondiente. 
 Preparad esos códigos y probadlos. El resultado puede ser vuestro segundo test unitario que os permitirá verificar, en caso de necesidad, que la comunicación entre los arduinos funciona correctamente. Como es lógico, ahora no tiene sentido hablar de un arduino transmisor y otro receptor puesto que ambos transmiten y reciben.
+
+### Paso 7: Recepción de datos en la interfaz Python
+En el paso anterior hemos visto cómo los datos que envía un Arduino llegan, a través del canal serie, hasta el portátil conectado al segundo Arduino. Los datos llegan hasta el IDE conectado al Arduino receptor y se muestran en el monitor serie correspondiente.   
+ 
+Sin embargo, lo que realmente nos interesa es que los datos lleguen a nuestro programa en Python que será la interfaz gráfica con el usuario. Por tanto, el programa en Python también debe poder leer los datos que se reciben por el canal serie.   
+ 
+El código Python necesario para hacer esto es el siguiente:   
+```
+import serial
+device = 'COM3'
+mySerial = serial.Serial(device, 9600)
+while True:
+   if mySerial.in_waiting > 0:
+      linea = mySerial.readline().decode('utf-8').rstrip()
+      print(linea)
+```
+El programa identifica el puerto serie que debe usarse (el mismo COM al que está conectado el Arduino receptor). Después configura el canal de comunicación serie, con la velocidad adecuada. Luego entra en un bucle infinito en el que pregunta si se han recibido datos y en caso afirmativo lee toda la frase recibida y la escribe en consola. La lógica del programa es la misma que la del programa que ejecuta el Arduino receptor que se ha visto en el paso anterior.    
+ 
+Para que este programa funcione es necesario instalar en el intérprete de Python la librería _myserial_.   
+ 
+Muy probablemente, al ejecutar el programa se producirá un error porque el programa no puede usar el puerto serie específicado. Eso se produce en el caso de que en ese momento esté activo el monitor serie del IDE conectado al Arduino receptor. Puesto que el puerto serie está ocupado por el monitor serie, el programa en Python no puede usarlo. El problema se resuelve cerrando el monitor serie, con lo cual el puerto serie queda libre para que pueda ser usado por el programa Python.    
+ 
+Quizá ahora es buena idea añadir algo más de código al test unitario de comunicaciones para verificar también que los datos llegan correctamente al programa e Python.   
+ 
+### Paso 8: Presentar los datos de temperatura y humedad al usuario
+Tenemos ya encima de la mesa todos los elementos necesarios para construir un sistema en el que el Arduino satélite capte los datos de temperatura y humedad y los envíe a tierra (por cable) cada 3 segundos, de manera que esos datos aparezcan en la consola del programa en Python para que pueda verlos el usuario. Además, el Arduino satélite debe tener un led verde que se encienda durante un breve instante cada vez que se envían datos y el Arduino de tierra también un led verde que se enciende cada vez que recibe nuevos datos.    
+
+### Paso 8: Una gráfica dinámica con los datos de temperatura
+La forma ideal de presentar al usuario los datos de temperatura es mediante una gráfica que muestre cómo evolucionan esos datos a lo largo del tiempo. Para ello podemos usar la librería _matplotlib_ de Python. Veamos cómo hacerlo.   
+  
+Para empezar, haremos que el satélite envíe los datos en un formato que resulte fácil de procesar en tierra. Por ejemplo, el mensaje podría ser:    
+_“T:34,2:H:20,5”_    
+ 
+Este formato tiene la ventaja de que ocupa menos bytes (menos saturación en el canal de comunicación). La segunda ventaja es que cuando el programa Python reciba el mensaje podrá hacer la siguiente operación:    
+ 
+_trozos = mensajeRecibido.Split (‘:’)_   
+ 
+De esta operación se obtiene una lista de 4 trozos. El dato de temperatura (que queremos mostrar en la gráfica) está en _trozos[1]_ y el de humedad en _trozos[3]_.   
+ 
+En el vídeo siguiente se muestra cómo incorporar una gráfica al programa en Python que muestre de manera dinámica los datos de temperatura que se van recibiendo.    
+
+[![](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D_fIoPHwnay0)](https://www.youtube.com/watch?v=_fIoPHwnay0)
+   
 
 
 
