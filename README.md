@@ -276,12 +276,17 @@ Para enfrentarse a ese reto es esencial disponer de una colección de programas 
 Como es natural, la comunicación entre el arduino satélite y el arduino tierra se realizará de forma inalámbrica, para lo cual se necesitará el kit LoRa. Sin embargo, por comodidad, en las primeras versiones el enlace de comunicación será por cable. En cualquiera de los dos casos, la comunicación utilizará el protocolo de comunicación serie UART.   
  
 Como puede verse en la siguiente figura, para comunicar dos dispositivos mediante el protocolo UART solo se necesitan tres cables. El device 1 envía los bits al devide 2 por el cable rojo (salida TX del device 1 y entrada RX del 2) y recibe los bits por el verde. Ambos dispositivos deben tener una referencia común que proporciona el cable negro (GND).   
+<img  src="https://github.com/user-attachments/assets/c38dd31f-8e4d-472e-bdf4-06dc669fda68" width="400" height="100"/>
   
-La figura siguiente muestra un diagrama de tiempos que ilustra cómo funciona la comunicación. Imagina que estamos observando el cable rojo por que el viajan los bits del device 1 al devide 2. En el estado de reposo (idle) el cable está a 5V (un bit a 1). Para empezar la transmisión el cable se pone a 0. A partir de ahí se envían los 8 bits que conforman el byte que se quiere transmitir (un byte puede codificar, por ejemplo, una letra). Finalmente, el cable vuelve a 1 y se queda en estado idle hasta que haya que transmitir el siguiente byte. Como es lógico, la frecuencia a la que el transmisor envía los bits debe ser la misma que la frecuencia a la que el receptor los muestrea. En el ejemplo de la figura, si el receptor muestrea el doble de rápido interpretará que está recibiendo la secuencia “11001100..”.   
+La figura siguiente muestra un diagrama de tiempos que ilustra cómo funciona la comunicación.   
+
+<img  src="https://github.com/user-attachments/assets/c1e4ff4d-1efe-4d55-9746-4d67722b8bf3" width="400" height="100"/>
+ 
+Imagina que estamos observando el cable rojo por que el viajan los bits del device 1 al devide 2. En el estado de reposo (idle) el cable está a 5V (un bit a 1). Para empezar la transmisión el cable se pone a 0. A partir de ahí se envían los 8 bits que conforman el byte que se quiere transmitir (un byte puede codificar, por ejemplo, una letra). Finalmente, el cable vuelve a 1 y se queda en estado idle hasta que haya que transmitir el siguiente byte. Como es lógico, la frecuencia a la que el transmisor envía los bits debe ser la misma que la frecuencia a la que el receptor los muestrea. En el ejemplo de la figura, si el receptor muestrea el doble de rápido interpretará que está recibiendo la secuencia “11001100..”.   
  
 El montaje más simple que se necesita para experimentar la comunicación serie por cable es el que se muestra en la figura siguiente.
 
- 
+ <img  src="https://github.com/user-attachments/assets/01d9d53e-5bb3-4b14-99f1-6ed7008cfdf2" width="400" height="300"/>
 
 Los dos Arduinos están conectados al mismo portátil (cada uno a un puerto USB diferente). Tenemos por tanto dos IDE en marcha en el portátil, cada uno ocupándose de uno de los Arduinos. En ambos Arduinos el pin 10 actua como señal RX y el pin 11 como señal TX y están conectados también mediante la señal GND.   
  
