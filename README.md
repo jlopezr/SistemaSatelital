@@ -366,13 +366,14 @@ Tenemos ya encima de la mesa todos los elementos necesarios para construir un si
 La forma ideal de presentar al usuario los datos de temperatura es mediante una gráfica que muestre cómo evolucionan esos datos a lo largo del tiempo. Para ello podemos usar la librería _matplotlib_ de Python. Veamos cómo hacerlo.   
   
 Para empezar, haremos que el satélite envíe los datos en un formato que resulte fácil de procesar en tierra. Por ejemplo, el mensaje podría ser:    
-_“T:34,2:H:20,5”_    
+ 
+_“T:34,2:H:20”_    
  
 Este formato tiene la ventaja de que ocupa menos bytes (menos saturación en el canal de comunicación). La segunda ventaja es que cuando el programa Python reciba el mensaje podrá hacer la siguiente operación:    
  
 _trozos = mensajeRecibido.Split (‘:’)_   
  
-De esta operación se obtiene una lista de 4 trozos. El dato de temperatura (que queremos mostrar en la gráfica) está en _trozos[1]_ y el de humedad en _trozos[3]_.   
+De esta operación se obtiene una lista de 4 trozos. El dato de temperatura que queremos mostrar en la gráfica (34,2 en el ejemplo anterior) está en _trozos[1]_ y el de humedad (20) en _trozos[3]_.   
  
 En el vídeo siguiente se muestra cómo incorporar una gráfica al programa en Python que muestre de manera dinámica los datos de temperatura que se van recibiendo.    
 
