@@ -334,7 +334,8 @@ La función _mySerial.available()_ indica si se han recibido nuevos bytes por el
 Puesto que queremos que la frase recibida se pueda ver el monitor serie del IDE conectado al arduino receptor, el programa usa también el canal _Serial_, tal y como se vio en el paso 3. Fíjate que para escribir en el monitor serie la frase recibida el programa receptor usa la función _Serial.print(data)_ y no _Serial.println(data)_, que es lo que cabría esperar. ¿Por qué?.   
 
 Llegados a este punto, es fácil añadir a los programas del transmisor y del receptor el código necesario para que haya comunicación en ambos sentidos. Por ejemplo, el receptor puede enviar una frase de agradecimiento al transmisor cada vez que recibe un nuevo mensaje. Naturalmente, el transmisor enviará la frase recibida al monitor serie del IDE correspondiente. 
-Preparad esos códigos y probadlos. El resultado puede ser vuestro segundo test unitario que os permitirá verificar, en caso de necesidad, que la comunicación entre los arduinos funciona correctamente. Como es lógico, ahora no tiene sentido hablar de un arduino transmisor y otro receptor puesto que ambos transmiten y reciben.
+Preparad esos códigos y probadlos. El resultado puede ser vuestro segundo test unitario que os permitirá verificar, en caso de necesidad, que la comunicación entre los arduinos funciona correctamente. Como es lógico, ahora no tiene sentido hablar de un arduino transmisor y otro receptor puesto que ambos transmiten y reciben.   
+HABLAMOS AQUI YA DE COMO USAR EL CANAL HARDWARE EN VEZ DEL SOFTWARE PARA EVITAR LOS PROBLEMAS QUE VIMOS CUANDO INCORPOREN EL SERVO??
 
 ### Paso 7: Recepción de datos en la interfaz Python
 En el paso anterior hemos visto cómo los datos que envía un Arduino llegan, a través del canal serie, hasta el portátil conectado al segundo Arduino. Los datos llegan hasta el IDE conectado al Arduino receptor y se muestran en el monitor serie correspondiente.   
