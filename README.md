@@ -383,6 +383,7 @@ En el vídeo siguiente se muestra cómo incorporar una gráfica al programa en P
 
 ### Paso 10: Una interfaz gráfica más amigable
 El programa Python debe presentar al usuario una interfaz gráfica lo más amigable posible (con botones, colores, etc.). Aunque de momento la interacción entre el programa Python y el usuario es mínima, vamos a ver ya cómo crear una interfaz gráfica más amigable a la que iremos añadiendo funcionalidades a medida que vayan aumentando las necesodades de interacción con el usuario.   
+ 
 Para hacer la interfaz gráfica usaremos la librería Tkinter, que ya viene por defecto incorporada al intérprete de Python. El programa siguiente crea la interfaz gráfica que se muestra en la figura.   
 ```
 from tkinter import *
@@ -425,7 +426,15 @@ window.mainloop()
 ```
 <img  src="https://github.com/user-attachments/assets/0b2ad25e-4c7f-4717-9e8a-a44bcbc6b3d1" width="200" height="200"/>
 
+Aunque el código parece muy aparatoso, en realidad es muy sencillo. Conviene imaginar que la interfaz gráfica es una matriz de 3 filas y 5 columnas. Eso es exactamente lo que indicamos al principio del código. Después definimos los elementos que deben colocarse en cada una de las posiciones de esa matriz. Por ejemplo, el botón _A_ se coloca en la fila 2, columna 0. Además, indicamos el color que debe tener el botón y el texto que debe mostrarse.   
+   
+Algunos elementos ocupan más de una casilla de la matriz. Por ejemplo, el cuadro de texto llamado _fraseEntry_ se coloca en la fila 1, columna 0 pero se expande 3 columnas, y la etiqueta _tituloLabel_ se coloca en la fila 0, columna 0 y ocupa las 5 columnas.    
+ 
+El parámetro _command_ es el que indica la función que hay que ejecutar cuando se pulsa el botón. En el ejemplo anterior solo los botones _A_ y _Entrar_ tienen asociada una función.    
 
+Ejecuta el programa anterior y experimenta un poco con colores, posiciones y tamaños de botones y con las funciones asociadas a los botones.   
+
+ 
 
 
 
