@@ -474,6 +474,10 @@ El siguiente paso es retocar los códigos del Arduino de tierra para que transmi
 El código para el Arduino satélite es algo más complicado. Se trata de añadir una variable booleana (solo puede valer _true_ o _false_) que indique si debe o no enviar los datos cuando llegue el momento de hacerlo. Supongamos que llamamos a esa variable _enviarDatos_, que inicialmente tendrá el valor _true_. Por otra parte, tiene que estar pendiente de los mensajes que puedan llegar por mySerial (procedentes del Arduino de tierra) de manera que si el mensaje recibido es "Parar" pondrá la variable _enviarDatos_ a _false_ y si llega el mensaje "Reanudar" volverá a poner la palabra a _true_. Trata de hacer estos cambios y comprueba que el sistema funciona correctamente.   
 
 ### Paso 12: Incrustar la gráfica dinámica en la interfaz gráfica
+En la versión actual la gráfica dinámica de temperatura se muestra de manera independiente a la interfaz gráfica. Eso puede ser muy conveniente para poder arrastrar la gráfica al lugar mas conveniente de la pantalla de nuestro portátil.   
+
+Pero también puede ser conveniente diseñar la interfaz gráfica de manera que cada gráfica (habrá verias) tenga un lugar asignado en esa interfaz. Para hacer esto tenemos que aprender a incrustar las gráficas en una interfaz gráfica Tkinter. Los vídeos siguientes muestran cómo hacerlo.  
+[![](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DBnBhjilyvgw)](https://www.youtube.com/playlist?list=PL64O0POFYjHr0OWWax06x5CENZmxmfFec)
 
 ### Paso 13: Alarmas
 
