@@ -229,6 +229,7 @@ Vamos a conectar ahora al Arduino un sensor de temperatura y humedad. A diferenc
  
 La figura muestra cómo conectar el sensor a la placa Arduino.    
 
+<img  src="https://github.com/user-attachments/assets/b634d33d-6cf3-428c-9f74-108bd98d5d9e" width="400" height="350"/>
  
 El sensor DHT11 envia la información a la placa a través del cable verde, que está conectado al pin 2.  La comunicación se realiza mediante un protocolo llamado One‑Wire que solo necesita un cable para transmitir la información.  
  
