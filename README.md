@@ -542,5 +542,51 @@ Por otra parte debe entregarse un vídeo de no más de 5 minutos que muestre el 
 
 HACEMOS QUE MANTENGAN UN REPOSITORIO EN GITHUB CON LAS DIFERENTES VERSIONES DEL PROYECTO Y QUE NOS VAYAN ENTREGANDO LA URL?
  
+## 5. Versión 2
+La versión 2 del proyecto está mucho menos guiada que la version 1. Además, empezará ya a ser necesario identificar tareas que puedan repartirse entre los miembros del grupo, para luego integrar los resultados y verificar el correcto funcionamiento de todo junto. En los apartados siguientes se describen los requisitos de la versión 2 y se dan algunas pautas que pueden ayudar a su implementación.    
+ 
+### Protocolo de aplicación
+En la versión 2 (y siguientes) va a aumentar significativamente el número de tipos de mensajes que se intercambian el satélite y la estación de tierra. Por ejemplo, desde el satélite hacia la estación de tierra no solo viajarán los datos de temperatura y humedad sino valores medios de la temperatura o datos de distancia de objetos cercanos al satélite. Por otra parte, desde la estación de tierra al satélite ademas de órdenes para parar o reanudar la transmisión de datos de temperatura también viajarán ordenes para cambiar la periodicidad de los envíos de datos o para cambiar la orientación del sensor de distancias. Se hace necesario, por tanto, definir lo antes posible un sencillo protocolo de aplicación en el que se defina el formato de todos los tipos de mensajes que viajan de un sitio a otro.   
 
+Lo más sencillo es que cada uno de los mensajes que se envían desde el satélite a tierra empiecen por un código que determine el tipo de información que lleva el mensaje. El código puede ser simplemente un número. Un ejemplo podria ser el siguiente:    
+"1:35,4:20"   
+"2:25"
+"3:"
+Los mensajes que empiezan con código "1" contienen un dato de temperatura (35,5 en el ejemplo) y otro de humedad (20), separados por el caracter ':'. Los mensajes que empiezan con código "2" contienen un dato de distancia (25 en el ejemplo). Los mensajes que empiezan por 3 ya no llevan más información e indican que se ha producido un fallo en la captura de datos de temperatura y es necesario activar la alarma correspondiente. A esa lista de tipos de mensajes habrá que ir anadiendo otros nuevos a medida que se vayan necesitando.   
+
+Naturalmente, la estación de tierra que recibirá el mensaje tendrá que usar la función _split_ para trocear el mensaje y determinar el tipo de mensaje recibido a partir del primero de los trozos obtenidos.   
+
+De manera similar es necesario fijar el formato de los mensajes que viajan de la estación de tierra al satélite. Podríamos tener por ejemplo:
+"1:5"
+"2:90"
+"3:"
+Los mensajes con código "1" indican el nuevo periodo para enviar datos de temperatura y humedad (5 segundos). Los que tienen el código "2" indican la nueva orientación que debe tomar el sensor de distancia (90 grados en el ejemplo). Los que tienen el código "3" indican que hay que detener el envío de datos de temperatura. Lógicamente, el programa del Arduino satélite debe trocear también los mensajes recibidos para determinar el tipo de mensaje y actuar en consecuencia. El siguiente trozo de código muestra cómo extraer del mensaje recibido la información que contiene.   
+
+```
+// la variable comando contiene el string con el mensaje que se acaba de recibir
+// vamos a extraer en código que indica el tipo de mensaje
+int fin=comando.indexOf(':',0); // fin es la posición que ocupa el primer ':' del mensaje
+// Extraigo los caracteres que hay desde el inicio del mensaje hasta la posición fin
+// y convierto el resultado en un número entero que es el código
+int codigo = comando.substring(0, fin).toInt(); 
+int inicio = fin+1;
+// ahora segun el código extraigo el resto de la información
+if (codigo == 1){
+    // cambio del periodo de envio de la temperatura
+    // extraigo el valor del nuevo periodo
+    fin=comando.indexOf(':',inicio);
+    periodoTH = comando.substring(inicio, fin).toInt();
+    .....
+```
+Tomad ya en el equipo las decisiones básicas para vuestro protocolo de aplicación, haciendo una previsión del tipo de mensajes que se van a tener que enviar de un sitio a otro en esta versión 2.
+
+Tomar datos del sensor de distancia 
+Montar el sensor de distancia en un servo motor para orientarlo
+Añadir funciones para cambiar el periodo de envio de datos de temperatura/humedad y datos de distancia
+Enviar la media de los ultimos 10 valores de temperatura
+Que la media pueda calcularse en el satélite o en tierra.
+Alarma de datos incorrectos del sensor de distancia.
+ 
+
+  
 
