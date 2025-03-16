@@ -129,9 +129,9 @@ void loop() {
 }
 ```
 
-Fijaros que los programas de Arduino no tienen una función main(). En su lugar, tienen dos funciones: setup() y loop(). La función setup() se ejecuta una vez al inicio del programa, mientras que la función loop() se ejecuta continuamente en un bucle.   
+Fijaros que los programas de Arduino no tienen una función _main()_. En su lugar, tienen dos funciones: _setup()_ y _loop()_. La función _setup()_ se ejecuta una vez al inicio del programa, mientras que la función _loop()_ se ejecuta continuamente en un bucle.   
   
-En este caso, la función setup() configura el pin 13 como una salida digital. La función loop() enciende y apaga el pin 13 cada segundo. Este pin está conectado a un led en la placa Arduino (de color amarillo), por lo que veremos el led parpadear cada segundo.    
+En este caso, la función _setup()_ configura el pin 13 como una salida digital. La función _loop()_ enciende y apaga el pin 13 cada segundo. Este pin está conectado a un led en la placa Arduino (de color amarillo), por lo que veremos el led parpadear cada segundo.    
   
 Para cargar el programa en la placa Arduino simplemente pulsamos el segundo icono de la barra de herramientas, el de la flecha hacia la derecha, correspondiente a la función de “Cargar”. Si todo ha ido bien, veremos un mensaje indicando que la carga se ha completado en la parte inferior de la ventana y veremos el led parpadear. Tenemos entonces la placa y el IDE bien configurado y podemos empezar a dar los pasos de la primera versión del proyecto.   
 
@@ -203,8 +203,68 @@ Con esta estructura es muy fácil añadir más tareas periódicas a nuestro prog
 AQUÍ ES INTERESANTE QUE EXPERIMENTEN EL PROBLEMA QUE SE PRODUCE CUANDO TIENEN EL PROGRAMA FUNCIONANDO UN RATO DE  MANERA QUE SE DESBORDAN LAS VARIABLES mextMillis, QUE SON DE TIPO int Y DEBERIAN SER DE TIPO unsigned long. AUNQUE INCLUSO EN ESE CASO, SI EL SATELITE VA A ESTAR FUNCIONANDO AÑOS, ACABARÁ DESBORDANDOSE.
 PUEDE SER INTERESANTE QUE OBSERVEN CUÁNTO TARDA EN DESBORDARSE UN INT, PREDECIR CUÁNTO TARDARÍA EN DESBORDARSE UN INSIGNED LONG Y CUAL SERÍA LA SOLUCIÓN DEFNITIVA AL PROBLEMA.    
 
+### Paso 3: Comunicación entre Arduino y el portátil
+La placa Arduino está conectada a un puerto USB de tu portátil. Esa es una comunicación serie que utiliza el protocolo UART (Universal Asynchronous Receiver/Transmitter). En el paso X aprenderás más sobre este protocolo, que también se usará para conectar por cable el arduino satélite con el arduino de tierra.  
+  
+Esta comunicación serie por cable entre el portátil y la placa Arduino ya se ha estado usando para que el IDE que se ejecuta en tu portátil pueda enviar el código compilado de tu programa a la placa, donde se va a ejecutar. Ahora vamos a aprender a usar ese mismo canal de comunicación para que el programa que se ejecuta en la placa pueda enviar mensajes al IDE de manera que éste pueda mostrarlos al usuario.    
+   
+Fíjate en el programa siguiente:
+```
+int i=0;
+void setup() {
+   Serial.begin(9600);
+}
+void loop() {
+   Serial.println(i);
+   i++;
+   delay(1000);
+}
+```
+Este programa envía un número entero cada segundo a través del puerto serie a una velocidad de 9600 baudios (bits por segundo), que es la velocidad configurada en la función _setup()_. Para ver en tu portátil los datos recibidos, puedes abrir el monitor serie en Arduino IDE seleccionando la opción “Herramientas” ‑> “Monitor Serie” o seleccionado el icono de la lupa en la barra de herramientas.   
+ 
+Prueba ahora a modificar el programa que gestiona los dos leds para añadirle una nueva tarea que consista en escribir en el Monitor serie la frase “Aún sigo aquí”, cada 10 segundos.    
+ 
+### Paso 4: Sensor de temperatura
+Vamos a conectar ahora al Arduino un sensor de temperatura y humedad. A diferencia del led, cuya operación requiere una señal de salida de Arduino, el sensor de temperatura nos proporciona una señal de entrada que codifica la temperatura y humedad captadas. Utilizaremos el sensor DHT11, que tiene un rango de medición de temperatura de 0 a 50 grados Celsius y un rango de medición de humedad de 20% a 90%.   
+ 
+La figura muestra cómo conectar el sensor a la placa Arduino.    
 
-
+ 
+El sensor DHT11 envia la información a la placa a través del cable verde, que está conectado al pin 2.  La comunicación se realiza mediante un protocolo llamado One‑Wire que solo necesita un cable para transmitir la información.  
+ 
+Existe ya una librería de Arduino que facilita la comunicación con el sensor DHT11. Para instalar la librería, selecciona el tercer icono de la barra lateral de herramientas, el correspondiente a “Gestor de bibliotecas”. En el buscador, escribe “DHT” y pulsa “Instalar” en la librería “DHT sensor library by Adafruit”.    
+ 
+Una vez instalada la librería, puedes utilizarla en tus programas de Arduino. A continuación tienes un ejemplo de programa que lee la temperatura y la humedad del sensor DHT11 cada 2 segundos y las muestra en el monitor serie:    
+```
+// Definiciones necesarias
+#include <DHT.h>
+#define DHTPIN 2
+#define DHTTYPE DHT11
+DHT dht(DHTPIN, DHTTYPE);
+void setup() {
+   Serial.begin(9600);
+   // Inicialización del sensor
+   dht.begin();
+}
+void loop() {
+   delay(2000);
+   float h = dht.readHumidity();
+   float t = dht.readTemperature();
+   if (isnan(h) || isnan(t))
+      Serial.println("Error al leer el sensor DHT11");
+   else {
+      Serial.print("Humedad: ");
+      Serial.print(h);
+      Serial.print("%\t");
+      Serial.print("Temperatura: ");
+      Serial.print(t);
+      Serial.println("°C");
+   }
+}
+```
+La función _dht.readHumidity()_ devuelve la humedad en porcentaje, y la función _dht.readTemperature()_ devuelve la temperatura en grados Celsius. Si no se puede leer la humedad o la temperatura, las funciones devuelven NAN (Not A Number). _isnan()_ es una función que comprueba si un número es NAN. _\t_ es un carácter de tabulación, que nos permite alinear los datos en el monitor serie. Fíjate cómo escribimos en el monitor serie una frase por partes, como por ejemplo: "Humedad: 25%   Temperatura: 30ºC". La función _Serial.println()_: introduce al final de la frase el caracter de fin de línea.   
+ 
+Incorpora ahora al programa que controla los dos leds una nueva tarea que captura los datos del sensor cada 5 segundos los envía por el canal serie para que se muestren en el monitor serie.
 
 
 
