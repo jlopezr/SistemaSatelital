@@ -265,7 +265,75 @@ void loop() {
 ```
 La función _dht.readHumidity()_ devuelve la humedad en porcentaje, y la función _dht.readTemperature()_ devuelve la temperatura en grados Celsius. Si no se puede leer la humedad o la temperatura, las funciones devuelven NAN (Not A Number). _isnan()_ es una función que comprueba si un número es NAN. _\t_ es un carácter de tabulación, que nos permite alinear los datos en el monitor serie. Fíjate cómo escribimos en el monitor serie una frase por partes, como por ejemplo: "Humedad: 25%   Temperatura: 30ºC". La función _Serial.println()_: introduce al final de la frase el caracter de fin de línea.   
  
-Incorpora ahora al programa que controla los dos leds una nueva tarea que captura los datos del sensor cada 5 segundos los envía por el canal serie para que se muestren en el monitor serie.
+Incorpora ahora al programa que controla los dos leds una nueva tarea que captura los datos del sensor cada 5 segundos los envía por el canal serie para que se muestren en el monitor serie.   
+
+### Paso 5: Test unitario
+A medida que se avance en el proyecto vais a tener más líneas de código, más dispositivos en las placas Arduino y más cables. Además, con frecuencia tendréis que poner/quitar dispositivos y cables (por ejemplo, para recogerlo todo al acabar la jornada y volver a montarlo todo el siguiente día). Es, por tanto, bastante probable que algo que funcionaba ayer no funcione bien hoy porque falta algún cable, por ejemplo. Y claro, cuando hay un montón de código, dispositivos y cables no va a ser nada fácil encontrar dónde está el fallo.    
+ 
+Para enfrentarse a ese reto es esencial disponer de una colección de programas de test unitario. Un test unitario es un programa que pone a prueba una parte muy específica del sistema para comprobar si funciona correctamente o no. Vuestro primer test unitario puede ser un programa que verifique que el sensor de temperatura está capturando correctamente los datos. Con lo que habéis aprendido en el paso anterior podéis preparar vuestro test unitario para el sensor de temperatura, que os vendrá muy bien en caso de crisis para descartar (o confirmar) que el problema sea el sensor.   
+
+### Paso 6: Enlace de comunicación entre dos arduinos
+Como es natural, la comunicación entre el arduino satélite y el arduino tierra se realizará de forma inalámbrica, para lo cual se necesitará el kit LoRa. Sin embargo, por comodidad, en las primeras versiones el enlace de comunicación será por cable. En cualquiera de los dos casos, la comunicación utilizará el protocolo de comunicación serie UART.   
+ 
+Como puede verse en la siguiente figura, para comunicar dos dispositivos mediante el protocolo UART solo se necesitan tres cables. El device 1 envía los bits al devide 2 por el cable rojo (salida TX del device 1 y entrada RX del 2) y recibe los bits por el verde. Ambos dispositivos deben tener una referencia común que proporciona el cable negro (GND).   
+  
+La figura siguiente muestra un diagrama de tiempos que ilustra cómo funciona la comunicación. Imagina que estamos observando el cable rojo por que el viajan los bits del device 1 al devide 2. En el estado de reposo (idle) el cable está a 5V (un bit a 1). Para empezar la transmisión el cable se pone a 0. A partir de ahí se envían los 8 bits que conforman el byte que se quiere transmitir (un byte puede codificar, por ejemplo, una letra). Finalmente, el cable vuelve a 1 y se queda en estado idle hasta que haya que transmitir el siguiente byte. Como es lógico, la frecuencia a la que el transmisor envía los bits debe ser la misma que la frecuencia a la que el receptor los muestrea. En el ejemplo de la figura, si el receptor muestrea el doble de rápido interpretará que está recibiendo la secuencia “11001100..”.   
+ 
+El montaje más simple que se necesita para experimentar la comunicación serie por cable es el que se muestra en la figura siguiente.
+
+ 
+
+Los dos Arduinos están conectados al mismo portátil (cada uno a un puerto USB diferente). Tenemos por tanto dos IDE en marcha en el portátil, cada uno ocupándose de uno de los Arduinos. En ambos Arduinos el pin 10 actua como señal RX y el pin 11 como señal TX y están conectados también mediante la señal GND.   
+ 
+El programa más simple para transmitir información del Arduino transmisor (por ejemplo, device 1) al receptor (device 2) se muestra a continuación.   
+```
+#include <SoftwareSerial.h>
+int i;
+SoftwareSerial mySerial(10, 11); // RX, TX 
+void setup() {
+   mySerial.begin(9600);
+   mySerial.println("Empezamos");
+   i=1;
+}
+void loop() {
+   delay (3000);
+   mySerial.print("Envío: ");
+   mySerial.println(i);
+   i=i+1;
+}
+```
+
+La librería que facilitará la comunicación es _SoftwareSerial_, que ya está instalada por defecto. El programa transmisor crea un canal de comunicación serie que llama _mySerial_ y le indica qué pines debe usar como RX (pin 10) y como TX (pin 11). En la función _setup_ establece la velocidad de comunicación de ese canal (9600 baudios) y se envía ya un primer mensaje de aviso. La función _loop_ enviará con ese canal, cada 3 segundos, serie la frase “Envío n”, siendo n un número del 1 en adelante. Por el canal de comunicación viajarán bit a bit los códigos ASCII de cada uno de los caracteres de la frase, incluido el carácter de fin de línea que se añade automáticamente por el hecho de haber usado la función _println_.   
+ 
+El programa que debe ejecutar el Arduino receptores el siguiente:   
+```
+#include <SoftwareSerial.h>
+SoftwareSerial mySerial(10, 11); // RX, TX (azul, naranja)
+unsigned long nextMillis = 500;
+void setup() {
+   Serial.begin(9600);
+   Serial.println("Empezamos la recepción");
+   mySerial.begin(9600);
+}
+void loop() {
+   if (mySerial.available()) {
+      String data = mySerial.readString();
+      Serial.print(data);
+   }
+}
+´´´
+El receptor también va a usar la libreria _SoftwareSerial_. Crea el canal _mySerial_ para las comunicaciones serie, también usando los pines 10 y 11 como RX y TX respectivamente, y especifica la velocidad de comunicación, que debe coincidir con la establecida por el transmisor.
+ 
+La función _mySerial.available()_ indica si se han recibido nuevos bytes por el canal serie. En caso afirmativo se leen todos los bytes hasta el carácter de fin de línea, usando la función _mySerial.readString()_.
+
+Puesto que queremos que la frase recibida se pueda ver el monitor serie del IDE conectado al arduino receptor, el programa usa también el canal _Serial_, tal y como se vio en el paso 3. Fíjate que para escribir en el monitor serie la frase recibida el programa receptor usa la función _Serial.print(data)_ y no _Serial.println(data)_, que es lo que cabría esperar. ¿Por qué?.   
+
+Llegados a este punto, es fácil añadir a los programas del transmisor y del receptor el código necesario para que haya comunicación en ambos sentidos. Por ejemplo, el receptor puede enviar una frase de agradecimiento al transmisor cada vez que recibe un nuevo mensaje. Naturalmente, el transmisor enviará la frase recibida al monitor serie del IDE correspondiente. 
+Preparad esos códigos y probadlos. El resultado puede ser vuestro segundo test unitario que os permitirá verificar, en caso de necesidad, que la comunicación entre los arduinos funciona correctamente. Como es lógico, ahora no tiene sentido hablar de un arduino transmisor y otro receptor puesto que ambos transmiten y reciben.
+
+
+
+
 
 
 
