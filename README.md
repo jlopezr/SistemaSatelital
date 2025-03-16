@@ -136,7 +136,7 @@ En este caso, la función _setup()_ configura el pin 13 como una salida digital.
 Para cargar el programa en la placa Arduino simplemente pulsamos el segundo icono de la barra de herramientas, el de la flecha hacia la derecha, correspondiente a la función de “Cargar”. Si todo ha ido bien, veremos un mensaje indicando que la carga se ha completado en la parte inferior de la ventana y veremos el led parpadear. Tenemos entonces la placa y el IDE bien configurado y podemos empezar a dar los pasos de la primera versión del proyecto.   
 
 ## 4. Versión 1
-En esta sección hay una guía paso a paso para el desarrollo de la versión 1 del proyecto (el resto de versiones no están tan guiadas). Durante el desarrollo de esta versión conviene que los miembros del equipo trabajen codo con codo, para ayudarse mutuamente en la comprensión de lo que se está haciendo. No es momento aún de repartir el trabajo entre los miembros del equipo. Ya llegará ese momento en las siguientes versiones.   
+En esta sección hay una guía paso a paso para el desarrollo de la versión 1 del proyecto (el resto de versiones no están tan guiadas). Se recomienda fuertemente que cada miembro del grupo realice esos pasos de forma individual y que consulte las dudas con sus compañeros (o con los profesores si se está trabajando en el aula). Puesto que algunos pasos requieren el uso de dos Arduinos, en esos pasos tendréis que compartir recursos y hacelos juntos. En todo caso, no es momento aún de repartir el trabajo entre los miembros del equipo. Ya llegará ese momento en las siguientes versiones.   
   
 ### Paso 1: Led rojo
 Un led es un elemento muy simple que tiene dos patillas. La patilla larga se denomina ánodo y la corta cátodo. La corriente entre por el ánodo y según su intensidad ilumina el led con más o menos brillo. Si colocamos en el ánodo una tensión de 5V, que es la que proporciona un pin de salida de arduino, y conectamos el cátodo a tierra (0V) entonces la intensidad será muy alta y quemaremos el led. Para limitar la intensidad a valores operativos hay que colocar una resistencia de unos 220 omnios (más sobre estas cuestiones se estudia en asignaturas de electrónica). El esquema del montaje necesario se muestra en la figura.
@@ -429,12 +429,49 @@ window.mainloop()
 Aunque el código parece muy aparatoso, en realidad es muy sencillo. Conviene imaginar que la interfaz gráfica es una matriz de 3 filas y 5 columnas. Eso es exactamente lo que indicamos al principio del código. Después definimos los elementos que deben colocarse en cada una de las posiciones de esa matriz. Por ejemplo, el botón _A_ se coloca en la fila 2, columna 0. Además, indicamos el color que debe tener el botón y el texto que debe mostrarse.   
    
 Algunos elementos ocupan más de una casilla de la matriz. Por ejemplo, el cuadro de texto llamado _fraseEntry_ se coloca en la fila 1, columna 0 pero se expande 3 columnas, y la etiqueta _tituloLabel_ se coloca en la fila 0, columna 0 y ocupa las 5 columnas.    
+
+
  
 El parámetro _command_ es el que indica la función que hay que ejecutar cuando se pulsa el botón. En el ejemplo anterior solo los botones _A_ y _Entrar_ tienen asociada una función.    
 
 Ejecuta el programa anterior y experimenta un poco con colores, posiciones y tamaños de botones y con las funciones asociadas a los botones.   
 
  
+### Paso 11: Parar y reanudar la transmisión de datos de temperatura
+Una de las funcionalidades que debe tener la interfaz gráfica es permitir al usuario parar y reanudar en el envio por parte del satélite, de los datos de temperatura y humedad. Esa será la primera funcionalidad que vamos a incorporar a nuestra interfaz gráfica.   
+
+Prepara una interfaz gráfica en Tkinter que tenga 3 botones, que llamaremos _Iniciar_, _Parar_ y _Reanudar_. El botón _Iniciar_ se usará para iniciar la recepción de datos de humedad y temperatura. Cuando pulsemos ese botón debería mostrarse ya la gráfica con la evolución de la temperatura a lo largo del tiempo, como hemos hecho en el paso 9. El  botón _Parar_ se usará para enviar al satélite la orden de que detenga el envio de datos de humedad y temperatura. Finalmente el botón _Reanudar_ se usará para enviar al satélite la orden de reanudar el envío de datos.   
+
+Además del uso de una interfaz gráfica, la novedad más importante de este paso es el envío de un mensaje desde el programa Python al Arduino satélite. Se enviará la palabra 'Parar' o la palabra 'Reanudar' según el botón que pulse el usuario. Esas operaciones son muy sencillas. Por ejemplo, el código que hay que ejecutar para enviar la palabra 'Parar' por el canal serie desde el programa en Python es:  
+```
+mensaje = "Parar"
+mySerial.write(mensaje.encode('utf-8'))
+```
+Por otro lado, el código que hay que ejecutar cuando se pulse el botón para iniciar la recepción de datos es el siguiente (que ya vimos en el paso 7), asumiendo que se han realizado las inicializaciones necesarias:   
+```
+while True:
+   if mySerial.in_waiting > 0:
+      linea = mySerial.readline().decode('utf-8').rstrip()
+      print(linea)
+```
+Recuerda que ese código escribe los datos en consola. Ya sabes bien cómo hacer para que se muestren en una gráfica de manera dinámica.   
+
+El problema que se plantea es que si ejecutamos ese código al pulsar el botón _Iniciar_ la interfaz gráfica se va a quedar bloqueada ejecutando ese bucle infinito y no hará caso al usuario cuando pulse los botones _Parar_ o _Reanudar_. Para resolver ese problema tenemos que echar mano del mecanismo de concurrencia.   
+
+Cuando estás trabajando con tu portátil tienes varios programas en marcha al mismo tiempo. Por ejemplo, puedes estar ejecutando el IDE conectado a un Arduino y al mismo tiempo estás usando un navegador para consultar al ChatGPT y quizá una aplicación de mensajería para chatear con tus colegas. La impresión que tienes es que el procesador del portátil está ejecutando todos esos programa al mismo tiempo, porque ninguno de ellos está bloqueado por culpa de la ejecución de otros. En realidad, el procesador está usando el mecanismo de la concurrencia.   
+
+Lo que hace el procesador es ejecutar uno de esos programas durante un ratito (unos milisegundos), después le dedica otro ratito a otro de los programas y así va atendiendo durante unos milisegundos a todos los programas que tienes activos en tu portátil, hasta regresar al primero dedicarle unos pocos milisegundos más. Como el procesador hace todo eso de manera muy rápida, el usuario ni se entera del abandono que han ido sufriendo sus programas. Piensa que en el tiempo que tardas en decidir si pulsas el botón rojo o el azul, o mientras piensas qué le vas a pedir al ChatGPT el procesador tiene tiempo de dedicarle ese ratito a todos los programas activos.    
+
+La cuestión es cómo usar el mecanismo de la concurrencia para que el procesador pueda atender  al bucle infinito que recibe los datos y al mismo tiempo ejecutar las ordenes correspondientes cuando el usuario pulse un botón. La cosa se resuelve haciendo que el bucle infinito se ejecute en un thread (hilo) independiente, tal y como muestra el código siguienete:   
+```
+threadRecepcion = threading.Thread (target = recepcion)
+threadRecepcion.start()
+```
+Ese es el código que debe ejecutar la interfaz gráfica cuando el usuario pulsa el botón _Iniciar_. Se pone en marcha un nuevo thread que va a ejecutar la función _recepcion_ de manera concurrente con la interfaz gráfica, que ya no va a quedar bloqueada por culpa del bucle infinito, que ahora se pone en marcha en la función _recepcion_.    
+
+El siguiente paso es retocar los códigos del Arduino de tierra para que transmita al satélite las ordenes de parar o reanudar que reciba de la interfaz gráfica. La cosa es muy sencilla. De la misma manera que el Arduino de tierra recibe mesajes de mySerial (del satélite) y los envía por Serial (a la interfaz gráfica), puede recibir también de Serial y enviarlos tal cual a mySerial. Añade las líneas de código necesarias al programa del Arduino de tierra que se mostró en el paso 6 (al que allí nos referíamos como Arduino receptor).   
+
+El código para el Arduino satélite es algo más complicado. Se trata de añadir una variable booleana (solo puede valer _true_ o _false_) que indique si debe o no enviar los datos cuando llegue el momento de hacerlo. Supongamos que llamamos a esa variable _enviarDatos_, que inicialmente tendrá el valor _true_. Por otra parte, tiene que estar pendiente de los mensajes que puedan llegar por mySerial (procedentes del Arduino de tierra) de manera que si el mensaje recibido es "Parar" pondrá la variable _enviarDatos_ a _false_ y si llega el mensaje "Reanudar" volverá a poner la palabra a _true_. Trata de hacer estos cambios y comprueba que el sistema funciona correctamente.   
 
 
 
