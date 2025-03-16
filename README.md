@@ -517,11 +517,28 @@ El programa del Arduino de tierra tiene que incluir también el código necesari
 Implementa estas alarmas y comprueba que funcionan bien, por ejemplo desconectando alguno de los cables del sensor de humedad o alguno de los cables de comunicación entre los dos Arduinos.    
 
 ### Entrega de la verión 1
-Llegados a este punto ya podemos dar por concluida la versión 1 del proyecto. La tabla siguiente es un resumen de lo que debería estar funcionando y puede servirte como lista de comprobación.    
+Llegados a este punto ya podemos dar por concluida la versión 1 del proyecto. La lista siguiente es un resumen de lo que debería estar funcionando y puede servirte como lista de comprobación (recuerda que el término controlador se usa para referirnos al Arduino satélite).    
+ 
+1. El controlador capta correctamente los datos de humedad y temperatura.
+2. La estación de tierra recibe correctamente los datos que le envía el controlador y los muestra en una gráfica dinámica.
+3. La gráfica dinámica está incrustada en la interfaz gráfica.
+4. El usuario puede parar/reanudar el envío de los datos de humedad y temperatura
+5. El controlador avisa correctamente a la estación de tierra en el caso de que no pueda captar bien los datos de temperatura y humedad (por ejemplo, porque se han desconectado los sensores).
+6. La estación de tierra detecta un fallo en la comunicación con el controlador y avisa al usuario de esta circunstancia.
+7. El usuario de la estación de tierra no tiene ninguna duda de como interactuar con la interfaz gráfica ni para interpretar correctamente la información que se muestra en consola (tanto los datos como las alarmas)
+8. El código está bien estructurado e indentado. Es fácil localizar en que parte del código que hace cada una de las operaciones de la versión 1.
+9. Se han añadido comentarios clarificadores.
 
 En el caso de que cada miembro del grupo haya desarrollado su propia versión 1 del proyecto, es el momento de ponerse de acuerdo en cuál será el código con el que trabajará a partir de ahora todo el grupo para desarrollar las versiones siguientes.   
 
-La entrega de la versión 1 tiene dos partes. Por una parte debe entregarse un fichero comprimido con 3 códigos: Arduino satélite,  Arduino tierra y la interfaz gráfica. Por otra parte debe entregarse un vídeo de no más de 5 minutos que muestre el correcto funcionamiento del sistema (es decir, todo lo que indica la tabla anterior) y además muestre las partes más relevantes de los tres códigos, con énfasis especial en los códigos que no han sido producto de cortar de esta guía y pegar (por ejemplo, los códigos para incrustar la gráfica en la interfaz gráfica o para implementar las alarmas).  La forma en entregar el vídeo es colocar la url (de youtube o google drive) correspondiente en el campo Observaciones de la tarea en la que se ha entregado el código.
+La entrega de la versión 1 tiene dos partes. Por una parte debe entregarse un fichero comprimido con los códigos, que debe incluir:   
+
+* El código del Arduino satélite
+* El código del Arduino de tierra
+* El código de la interfaz gráfica
+* En una carpeta adicional: los códigos de los test unitarios que hayais preparado.   
+
+Por otra parte debe entregarse un vídeo de no más de 5 minutos que muestre el correcto funcionamiento del sistema (es decir, todo lo que indica la tabla anterior) y además muestre las partes más relevantes de los tres códigos, con énfasis especial en los códigos que no han sido producto de cortar de esta guía y pegar (por ejemplo, los códigos para incrustar la gráfica en la interfaz gráfica o para implementar las alarmas).  La forma en entregar el vídeo es colocar la url (de youtube o google drive) correspondiente en el campo Observaciones de la tarea en la que se ha entregado el código.
 
 
  
