@@ -476,11 +476,54 @@ El código para el Arduino satélite es algo más complicado. Se trata de añadi
 ### Paso 12: Incrustar la gráfica dinámica en la interfaz gráfica
 En la versión actual la gráfica dinámica de temperatura se muestra de manera independiente a la interfaz gráfica. Eso puede ser muy conveniente para poder arrastrar la gráfica al lugar mas conveniente de la pantalla de nuestro portátil.   
 
-Pero también puede ser conveniente diseñar la interfaz gráfica de manera que cada gráfica (habrá verias) tenga un lugar asignado en esa interfaz. Para hacer esto tenemos que aprender a incrustar las gráficas en una interfaz gráfica Tkinter. Los vídeos siguientes muestran cómo hacerlo.  
+Pero también puede ser conveniente diseñar la interfaz gráfica de manera que cada gráfica (habrá verias) tenga un lugar asignado en esa interfaz. Para hacer esto tenemos que aprender a incrustar las gráficas en una interfaz gráfica Tkinter. Los vídeos siguientes muestran cómo hacerlo.   
+ 
 [![](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DBnBhjilyvgw)](https://www.youtube.com/playlist?list=PL64O0POFYjHr0OWWax06x5CENZmxmfFec)
 
 ### Paso 13: Alarmas
+En este último paso vamos a incorporar mecanismos de alarma que puedan señalar al usuario el mal funcionamiento del sistema. De momento consideraremos solo el caso de fallo en la captura de datos de humedad y temperatura y fallo en la comunicación entre el satélite y la estación de tierra. La alarma puede consistir simplemente en encender un led en el Arduino de tierra, que es el que estará a la vista del usuario (lógicamente, tendremos dos leds de colores diferentes para informar al usuario del tipo de alarma).       
+
+Ya vimos en el paso 4 cómo detectar que el valor capturado de humedad o temperatura no es correcto. Lo que debemos resolver ahora es cómo avisar a la estación de tierra de tal circunstancia. Pero además, no vamos a avisar a la estación de tierra de manera inmediata. Conviene confirmar, antes de enviar la alarma, que los datos se están capturando mal durante algunos segundos (por ejemplo 5).   
+
+El código que necesitamos en el Arduino satélite (que es el que detectará la anomalía) es el siguiente:  
+```
+ void loop() {
+   // otras tareas
+   if (millis() >= nextHT) {
+      float h = dht.readHumidity();
+      float t = dht.readTemperature();
+      if (isnan(h) || isnan(t))
+         esperandoTimeout = true;
+         nextTimeoutHT = millis() + 5000; // 5 segundos
+      else {
+         esperandoTimeout = true;
+         Serial.print("T: ");
+         Serial.print(t);
+         Serial.print(":H:");
+         Serial.println(h);
+      }
+   }
+   if (esperandoTimeout && (millis() >= nextTimeoutHT))
+         Serial.print ("Fallo");
+   // otras tareas
+}
+```
+Si se produce un fallo al capturar la temperatura fijamos un tiempo límite (_nextTimeoutHT_) y si se alcanza este tiempo sin haber capturado correctamente la temperatura se envía la palabra "Fallo" a la estación de tierra.    
+
+Ahora hay que retocar un poco el código del Arduino de tierra de manera que si recibe del satélite la palabra "Fallo" encienda el led correspondiente a este tipo de alarma. Naturalmente, también puede enviar el mensaje a la interfaz gráfica en la que podemos mostrar de alguna manera esa situación de alarma (por ejemplo, haciendo sonar una alarma auditiva por si en ese momento el usuario se ha dormido y no puede ver encenderse el led).    
+
+El programa del Arduino de tierra tiene que incluir también el código necesario para detectar fallo de comunicación. Ese fallo se produce cuando pasa un cierto tiempo (por ejemplo, 5 segundos) sin recibir ningún mensaje del satélite. El mecanismo para implementar esta alarma puede ser muy similar al usado en el Arduino satelite para la alarma de temperatura incorrecta. Cuando el Arduino de tierra reciba un mensaje del satélite pondrá en marcha un mecanismo de timeout de 5 segundos. Si pasan esos 5 segundos sin haber recibido un nuevo mensaje del satélite encenderá el led correspondiente a ese tipo de alarma (e idealmente envía un mensaje a la interfaz gráfica para que se genere esa alarma sonora).   
+
+Implementa estas alarmas y comprueba que funcionan bien, por ejemplo desconectando alguno de los cables del sensor de humedad o alguno de los cables de comunicación entre los dos Arduinos.    
+
+### Entrega de la verión 1
+Llegados a este punto ya podemos dar por concluida la versión 1 del proyecto. La tabla siguiente es un resumen de lo que debería estar funcionando y puede servirte como lista de comprobación.    
+
+En el caso de que cada miembro del grupo haya desarrollado su propia versión 1 del proyecto, es el momento de ponerse de acuerdo en cuál será el código con el que trabajará a partir de ahora todo el grupo para desarrollar las versiones siguientes.   
+
+La entrega de la versión 1 tiene dos partes. Por una parte debe entregarse un fichero comprimido con 3 códigos: Arduino satélite,  Arduino tierra y la interfaz gráfica. Por otra parte debe entregarse un vídeo de no más de 5 minutos que muestre el correcto funcionamiento del sistema (es decir, todo lo que indica la tabla anterior) y además muestre las partes más relevantes de los tres códigos, con énfasis especial en los códigos que no han sido producto de cortar de esta guía y pegar (por ejemplo, los códigos para incrustar la gráfica en la interfaz gráfica o para implementar las alarmas).  La forma en entregar el vídeo es colocar la url (de youtube o google drive) correspondiente en el campo Observaciones de la tarea en la que se ha entregado el código.
 
 
+ 
 
 
