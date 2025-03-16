@@ -138,12 +138,72 @@ Para cargar el programa en la placa Arduino simplemente pulsamos el segundo icon
 ## 4. Versión 1
 En esta sección hay una guía paso a paso para el desarrollo de la versión 1 del proyecto (el resto de versiones no están tan guiadas). Durante el desarrollo de esta versión conviene que los miembros del equipo trabajen codo con codo, para ayudarse mutuamente en la comprensión de lo que se está haciendo. No es momento aún de repartir el trabajo entre los miembros del equipo. Ya llegará ese momento en las siguientes versiones.   
   
-### Paso 1: led rojo
+### Paso 1: Led rojo
 Un led es un elemento muy simple que tiene dos patillas. La patilla larga se denomina ánodo y la corta cátodo. La corriente entre por el ánodo y según su intensidad ilumina el led con más o menos brillo. Si colocamos en el ánodo una tensión de 5V, que es la que proporciona un pin de salida de arduino, y conectamos el cátodo a tierra (0V) entonces la intensidad será muy alta y quemaremos el led. Para limitar la intensidad a valores operativos hay que colocar una resistencia de unos 220 omnios (más sobre estas cuestiones se estudia en asignaturas de electrónica). El esquema del montaje necesario se muestra en la figura.
 
  <img src="https://github.com/user-attachments/assets/28247ec4-5b2d-4947-a593-392dcd4628ad" width="400" height="300" />
 
-Con ese montaje, el led se encenderá de manera permanente porque siempre tiene 5V en el ánodo. Si queremos poder encender y apagar el led por programa, tenemos que conectar el ánodo no a 5V sino a uno de los pines de salida de Arduino (por ejemplo el 12).  Ahora, el mismo programa que encendía y apagaba con el pin 13 el led amarillo que tiene la placa Arduino sirve para encender y apagar nuestro led rojo, si cambiamos el 13 por el 12. Compruébalo.
+Con ese montaje, el led se encenderá de manera permanente porque siempre tiene 5V en el ánodo. Si queremos poder encender y apagar el led por programa, tenemos que conectar el ánodo no a 5V sino a uno de los pines de salida de Arduino (por ejemplo el 12).  Ahora, el mismo programa que encendía y apagaba con el pin 13 el led amarillo que tiene la placa Arduino sirve para encender y apagar nuestro led rojo, si cambiamos el 13 por el 12. Compruébalo.    
+
+### Paso 2: Alternar la iluminación de dos leds
+Queremos encencer/apagar dos leds: el amarillo (conectado al pin 13)  y el rojo (conectado al pin 12) pero con periodos distintos, por ejemplo, el amarillo cada 2 segundos y el rojo cada 3.   
+ 
+Ahora ya no es tan fácil decidir cómo es el programa que hace eso, dónde colocar la operación delay y cuantos milisegundos debe esperar. Y la  cosa se complicará mucho más cuando nuestro programa tenga que hacer otras muchas tareas, con periodos diferentes (cosa que pasará muy pronto).    
+ 
+Para resolver esta cuestión usaremos un enfoque diferente para nuestros programas. Observad el código siguiente.    
+```
+const int led1 = 13;  // LED en el pin 13 (Amarillo)
+const int led2 = 12;  // LED en el pin 12 (Rojo)
+
+int nextMillis1;
+int nextMillis2;
+const long interval1 = 2000; // 2 segundos para el LED 13
+const long interval2 = 3000; // 3 segundos para el LED 12
+
+bool stateLed1 = LOW;
+bool stateLed2 = LOW;
+
+void setup() {
+    pinMode(led1, OUTPUT);
+    pinMode(led2, OUTPUT);
+    // primer instante en el que habrá que cambiar
+    nextMillis1 = millis() + interval1;
+    nextMillis2 = millis() + interval2;
+}
+
+void loop() {
+    // Control del LED en el pin 13 (2 segundos)
+    if (millis() >= nextMillis1) {
+        // Ya toca cambiar
+        if (stateLed1 == LOW)
+             stateLed1 = HIGH;
+        else
+             stateLed1 = LOW;
+        digitalWrite(led1, stateLed1);
+        // Siguiente instante en el que habrá que cambiar
+        nextMillis1 = millis() + interval1;
+    }
+
+    // Control del LED en el pin 12 (3 segundos)
+    if (millis() >= nextMillis2) {
+       if (stateLed2 == LOW)
+             stateLed2 = HIGH;
+        else
+             stateLed2 = LOW;
+        digitalWrite(led2, stateLed2);
+        nextMillis2 = millis() + interval2;
+    }
+}
+```
+ 
+El programa es fácil de entender. La función _millis()_ nos da el número de milisegundos que han pasado desde que se inició el programa. Nos proporciona, por tanto, una referencia del instante de tiempo actual. La variable _nextMillis1_ nos dice en qué instante toca cambiar el led amarillo. Por tanto, el bucle solo tiene que comprobar que ya hemos llegado a ese instante, entonces cambia el led y calcula el nuevo instante en el que habrá que volver a cambiar. Lo mismo hacemos con el led rojo.  
+  
+Con esta estructura es muy fácil añadir más tareas periódicas a nuestro programa. Por ejemplo, probad a añadir un led verde que se encienda/apague cada 5 segundos.    
+
+AQUÍ ES INTERESANTE QUE EXPERIMENTEN EL PROBLEMA QUE SE PRODUCE CUANDO TIENEN EL PROGRAMA FUNCIONANDO UN RATO DE  MANERA QUE SE DESBORDAN LAS VARIABLES mextMillis, QUE SON DE TIPO int Y DEBERIAN SER DE TIPO unsigned long. AUNQUE INCLUSO EN ESE CASO, SI EL SATELITE VA A ESTAR FUNCIONANDO AÑOS, ACABARÁ DESBORDANDOSE.
+PUEDE SER INTERESANTE QUE OBSERVEN CUÁNTO TARDA EN DESBORDARSE UN INT, PREDECIR CUÁNTO TARDARÍA EN DESBORDARSE UN INSIGNED LONG Y CUAL SERÍA LA SOLUCIÓN DEFNITIVA AL PROBLEMA.    
+
+
 
 
 
