@@ -540,7 +540,7 @@ La entrega de la versión 1 tiene dos partes. Por una parte debe entregarse un f
 
 Por otra parte debe entregarse un vídeo de no más de 5 minutos que muestre el correcto funcionamiento del sistema (es decir, todo lo que indica la tabla anterior) y además muestre las partes más relevantes de los tres códigos, con énfasis especial en los códigos que no han sido producto de cortar de esta guía y pegar (por ejemplo, los códigos para incrustar la gráfica en la interfaz gráfica o para implementar las alarmas).  La forma en entregar el vídeo es colocar la url (de youtube o google drive) correspondiente en el campo Observaciones de la tarea en la que se ha entregado el código.
 
-
+HACEMOS QUE MANTENGAN UN REPOSITORIO EN GITHUB CON LAS DIFERENTES VERSIONES DEL PROYECTO Y QUE NOS VAYAN ENTREGANDO LA URL?
  
 
 
