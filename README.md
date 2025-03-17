@@ -600,13 +600,10 @@ La forma ideal para mostrar los datos del sensor de ultrasonidos es una gráfica
 <img  src="https://github.com/user-attachments/assets/e9d0619a-bab3-4fdc-839a-6ab57e9af99b" width="400" height="300"/>    
 Finalmente, conviene que desde la estación de tierra se pueda dar la orden al satélite para que oriente el sensor en una dirección concreta en la que se aprecia un mayor peligro.    
 
+### Modificación de los periodos de transmisión
+Para completar la versión 2 se desea que desde la interfaz gráfica se pueda cambiar el periodo de transmisión de los datos de temperatura/humedad/medidas. También se desea poder parar/reanudar la transmisión los datos de distancia y modificar su periodo de transmisión.   
 
-Tomar datos del sensor de distancia 
-Montar el sensor de distancia en un servo motor para orientarlo
-Añadir funciones para cambiar el periodo de envio de datos de temperatura/humedad y datos de distancia
-Enviar la media de los ultimos 10 valores de temperatura
-Que la media pueda calcularse en el satélite o en tierra.
-Alarma de datos incorrectos del sensor de distancia.
+
  
 
   
