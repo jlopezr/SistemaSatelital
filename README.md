@@ -645,7 +645,12 @@ Un sistema ampliamente usado consiste en añadir al mensaje un checksum. Se trat
 
 Implementad en vuestro sistema un mecanismo de checksum que permita descartar los mensajes que han sufrido alteraciones durante la transmisión.   
 
-### 6.2 Posición del satélite
+### 6.2 Posición del satélite    
+
+Lamentablemente no podemos enviar nuestra Arduino al espacio (todavia) pero si podemos programarla
+para que simule el movimiento de un satelite en orbita. Para esta primera versión de la simulación,
+asumiremos que el satelite realiza una orbita circular alrededor de la tierra a una altura constante
+en el plano ecuatorial.
 ### 6.3 Comunicación inalámbrica
 En las versiones anteriores la comunicación entre el Arduino satélite y el Arduino tierra se ha hecho, por comodidad, por cable, usando el protocolo UART de comunicación serie. Pero como es lógico, en el sistema final la comunicación debe realizarse de forma inalambrica. En esta versión 3 vamos a experimentar ya con esta comunicación inalambrica, para lo cual usaremos la tecnología LoRa (Long Range) que está diseñado para comunicaciones a gran distancia y con poco consumo de energía que es justo lo que necesitamos para la comunicación con satélites. En el proyecto usaremos el kit LoRa que usa el chip SX1276 (hay otros modelos cuyo funcionamiento puede ser diferente).   
 
@@ -676,6 +681,84 @@ Los eventos deben guardarse en un fichero de texto, para que no se pierdan al ce
 
 
 
+## 7. Versión 4 (final)
+La versión 4 no tiene requisitos específicos. Naturalmente, es una ultima oportunidad para incorporar los requisitos previstos en las versiones anteriores y que aún no están operativos. No obstante, lo importante de la versión final es que se abre la puerta a funcionalidades adicionales ambiciosas que puedan sorprender a vuestros profesores. Recordad que una parte de la calificación del proyecto depende de esas funcionalidade adicionales.   
 
+Es muy probable que el grupo ya tenga ideas para mejorar el sistema. En todo caso, aquí se proponen tres retos ambiciosos. Quizá alguno de ellos capte vuestra atención.    
+### 7.1 Comunicaciones más ligeras
+Una manera de mejorar la eficiencia de nuestro sistema de comunicación entre satélite y estación de tierra es compactar la información que se envía. Si tenemos un mensaje que ocupa 10 bytes (80 bits) y podemos compactar la misma información en solo 2 bytes entonces conseguiremos que el enlace de comunicación esté menos saturado, lo cual permitirá, por ejemplo, aumentar la frecuencia de envío de datos del satélite a tierra.   
+ 
+Veamos un ejemplo. Supongamos que tenemos que enviar un mensaje que contiene 4 datos:    
+* El código (un número entre 0 y 3)   
+* El dato A (un número entre 0 y 7)   
+* El dato B (un número entre 0 y 7)   
+* El dato C (un número entre 0 y 31)   
+* El dato D (un número entre 0 y 7)   
   
+Esta información podría enviarse en forma de cadena de caracteres: “2/3/5/22/6”. Esta cadena ocupa 10 bytes, que son los que se necesitan para codificar en ASCII cada uno de los 10 caracteres de la cadena. Sin embargo, atendiendo al tamaño que pueden tener cada uno de los 4 datos, podríamos codificar el mensaje en 2 bytes, tal y como muestra la figura.
+ 
+Puesto que el código se puede codificar con 2 bits, los valores de A, B y D se pueden codificar con 3 bits y el valor de C se puede codificar con 5 bits, un total de 16 bits (2 bytes) son suficientes para codificar el mensaje completo, frente a los 10 bytes del mensaje en forma de cadena e caracteres.    
+ 
+Para poder hacer las operaciones de compactación y des-compactación de los mensajes es necesario aprender a trabajar a nivel de bit (máscaras, desplazamientos, AND y OR). Veamos lo esencial sobre esta cuestión.    
+```
+uint8_t RES = (DATO1 << 2) | DATO2;
+```
+Suponiendo que en DATO1 hay un número del 0 al 63 que, por tanto, puede codificarse con 6 bits, y en DATO2 hay un número del 0 al 3 (que se codifica con 2 bits) la sentencia anterior desplaza dos posiciones hacia la izquierda los bits del DATO1 para hacer sitio al DATO2 y luego hace la operación OR bit a bit (|), con lo cual se inyecta el valor de DATO2 en los dos bits bajos del resultado, que se almacena en una variable de tipo unit8_t, que contiene un entero sin signo de 8 bits. Si DATO1 contiene el número 13 y DATO2 el número 2, el contenido de RES será (en binario) *001101***10** (en itálica los bits que codifican el DATO1 y en negrita los que codifican el DATO2). Para comprender bien esta sentencia hay que entender que la operación OR entre dos bits da 0 si ambos bits son 0 y da 1 si al menos uno de los dos bits es 1.   
+
+```
+int DATO1 = (RES & 0b11111100) >> 2;
+int DATO2 = (RES & 0b00000011);
+```
+Estas dos sentencias permiten extraer los valores de DATO1 y DATO2 aplicando sobre RES máscaras binarias, la operación AND (&) bit a bit y un desplazamiento de 2 bits a la derecha. Al aplicar la operación AND a dos bit el resultado es 0 si al menos uno de los dos bits es 0 y da 1 si ambos bits son 1.   
+ 
+Este es un ejemplo más que incluye las operaciones de envío y recepción del mensaje a través del puerto serie.
+transmisor.
+```
+// enviar un mensaje con 
+// los 5 datos siguientes
+int cod = 3; // número entre 0 y 3
+int A = 2; // número entre 0 y 7
+int B = 5; // numero entre 0 y 7
+int C = 22; // número entre 0 y 31
+int D = 6; // número entre 0 y 7
+
+// necesito 2 bytes para 
+// empaquetar el mensaje
+uint8_t buffer[2]; 
+    
+// en el primer byte caben cod, A y B
+buffer[0] = (cod << 6) | (A << 3) | B;  
+// en el segundo byte caben C y D
+buffer[1] = (C << 3) | D;
+// transmitimos
+miSerial.write (buffer,2);	receptor
+
+// necesito 2 bytes para 
+// recibir el mensaje
+uint8_t buffer[2];
+
+// leemos los 2 bytes
+miSerial.readBytes(buffer, 2);
+
+// extraigo el codigo del primer byte
+int cod = ((buffer[0] & 0b11000000) >> 6);  
+// extraigo A
+int A = (buffer[0] & 0b00111000) >> 3;
+// extraigo B
+int B = (buffer[0] & 0b00000111);
+// extraigo C del segundo byte
+int C = (buffer[1] & 0b11111000) >> 3;
+// extraigo D
+int D = (buffer[1] & 0b00000111);
+```
+
+El ejemplo muestra que para transmitir el mensaje compactado debe usarse la función *miSerial.write*, que envía los datos en crudo (en binario). Si se usase *miSerial.println* se convertiría el contenido del buffer es una cadena de códigos ASCII correspondientes a los números contenidos, con lo que perderíamos todo lo ganado con la operación.    
+ 
+El reto consiste, por tanto, en introducir el código necesario para compactar y des-compactar mensajes, y verificar que ese cambio permite aumentar significativamente la frecuencia de las comunicaciones sin saturar el enlace inalámbrico entre el satélite y la estación de tierra.
+
+
+
+
+### 7.2 Comunicaciones más seguras
+### 7.3 Graficos de posición más realistas
 
