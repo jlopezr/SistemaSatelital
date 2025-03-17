@@ -596,8 +596,10 @@ Este sensor emite un sonido ultrasónico por uno de sus transductores y esperar 
 
 Naturalmente el sensor emite el sonido en la dirección en la que está orientado. Para que el sistema sea operativo es necesario que esa orientación pueda cambiar para detectar la proximidad de objetos peligrosos en cualquier dirección. Para conseguir esto montaremos el sensor de ultrasonidos en un servo motor que podemos hacer girar a voluntad por programa. Idealmente, el programa del Arduino satelite hará girar el servo motor de manera constante para conseguir un barrido de toda la zona y captar así la proximidad de objetos en toda la zona barrida. Los datos captados se enviarán a tierra para que puedan mostrarse al usuario.   
 
-La forma ideal para mostrar los datos del sensor de ultrasonidos es una gráfica tipo radar como la que se muestra en la imagen siguiente.    
+La forma ideal para mostrar los datos del sensor de ultrasonidos es una gráfica tipo radar como la que se muestra en la imagen siguiente. 
 
+<img  src="https://github.com/user-attachments/assets/e9d0619a-bab3-4fdc-839a-6ab57e9af99b" width="400" height="400"/>    
+ 
 Finalmente, conviene que desde la estación de tierra se pueda dar la orden al satélite para que oriente el sensor en una dirección concreta en la que se aprecia un mayor peligro.    
 
 
