@@ -547,7 +547,7 @@ En la versión 2 vamos a incorporar al sistema un sensor de distancia que nos pe
  
 La versión 2 del proyecto está mucho menos guiada que la version 1. Además, empezará ya a ser necesario identificar tareas que puedan repartirse entre los miembros del grupo, para luego integrar los resultados y verificar el correcto funcionamiento de todo junto. En los apartados siguientes se describen los requisitos de la versión 2 y se dan algunas pautas que pueden ayudar a su implementación.    
  
-### Protocolo de aplicación
+### 5.1 Protocolo de aplicación
 En la versión 2 (y siguientes) va a aumentar significativamente el número de tipos de mensajes que se intercambian el satélite y la estación de tierra. Por ejemplo, desde el satélite hacia la estación de tierra no solo viajarán los datos de temperatura y humedad sino valores medios de la temperatura o datos de distancia de objetos cercanos al satélite. Por otra parte, desde la estación de tierra al satélite ademas de órdenes para parar o reanudar la transmisión de datos de temperatura también viajarán ordenes para cambiar la periodicidad de los envíos de datos o para cambiar la orientación del sensor de distancias. Se hace necesario, por tanto, definir lo antes posible un sencillo protocolo de aplicación en el que se defina el formato de todos los tipos de mensajes que viajan de un sitio a otro.   
 
 Lo más sencillo es que cada uno de los mensajes que se envían desde el satélite a tierra empiecen por un código que determine el tipo de información que lleva el mensaje. El código puede ser simplemente un número. Un ejemplo podria ser el siguiente:    
@@ -582,14 +582,14 @@ if (codigo == 1){
 ```
 Tomad ya en el equipo las decisiones básicas para vuestro protocolo de aplicación, haciendo una previsión del tipo de mensajes que se van a tener que enviar de un sitio a otro en esta versión 2.
 
-### Cálculo de medias de temperatura
+### 5.2 Cálculo de medias de temperatura
 Debe incorporarse a las gráficas que se muestran al usuario una que presente la evolución en el tiempo del valor medio de los 10 últimos valores de temperatura. Además, el sistema debe mostrar una alarma al usuario en el caso de que se detecten tres valores medios consecutivos superiores a un valor límite especificado por el usuario.    
 
 El cálculo de esos valores medios puede realizarse en el satélite o en tierra. La ventaja de hacerlo en el satélite es que el sistema puede reaccionar inmediatamente en caso de situación de alarma, por ejemplo, activando un sistema de refrigeración. El inconveniente es que ese cálculo en el satélite consume energía, lo cual no es nada conveniente si el satélite debe estar operativo por un largo periodo de tiempo. El cálculo de los valores medios en tierra tiene justamente las ventajas e inconvenientes contrarios: el gasto de energía para el cálculo es más asumible en tierra pero el sistema no puede reaccionar de manera inmediata a la situación de alarma.   
 
 Se desea, por tanto, que el usuario puede elegir dónde se hace el cálculo de valores medios, si los hace el Arduino satélite (con lo cual esos valores habrá que enviarlos también a tierra) o si los hace la aplicación Python.   
 
-### Sensor de distancia
+### 5.3 Sensor de distancia
 El satélite debe estar dotado de un sistema que permita detectar la proximidad de objetos que puedan impactar con él. Para implementar este sistema usaremos el sensor ultrasónico HC-SR04.    
 
 Este sensor emite un sonido ultrasónico por uno de sus transductores y esperar que el sonido rebote de algún objeto presente. El eco es captado por el segundo transductor. La distancia es proporcional al tiempo que tarda en llegar el eco. Os resultara muy fácil encontrar información sobre cómo conectar el sensor al Arduino satélite y cómo capturar por programa los valores que proporciona.   
@@ -598,13 +598,73 @@ Naturalmente el sensor emite el sonido en la dirección en la que está orientad
 
 La forma ideal para mostrar los datos del sensor de ultrasonidos es una gráfica tipo radar como la que se muestra en la imagen siguiente. 
 <img  src="https://github.com/user-attachments/assets/e9d0619a-bab3-4fdc-839a-6ab57e9af99b" width="400" height="300"/>    
-Finalmente, conviene que desde la estación de tierra se pueda dar la orden al satélite para que oriente el sensor en una dirección concreta en la que se aprecia un mayor peligro.    
+Conviene también que desde la estación de tierra se pueda dar la orden al satélite para que oriente el sensor en una dirección concreta en la que se aprecia un mayor peligro.    
 
-### Modificación de los periodos de transmisión
+Debe incluirse el código necesario para detectar el fallo en el funcionamiento del sensor de distancia y mostrar una alarma en la estación de tierra (quizá un nuevo led de color).   
+
+Finalmente, resultará muy útil tener un nuevo test unitario que nos permita verificar el correcto funcionamiento del sensor de distancia.
+
+### 5.4 Modificación de los periodos de transmisión
 Para completar la versión 2 se desea que desde la interfaz gráfica se pueda cambiar el periodo de transmisión de los datos de temperatura/humedad/medidas. También se desea poder parar/reanudar la transmisión los datos de distancia y modificar su periodo de transmisión.   
 
-
+### 5.5 Entrega de la versión 2   
+La lista siguiente es un resumen de lo que debería estar funcionando en la versión 2.
  
+1. El controlador capta correctamente los datos de humedad, temperatura y distancia.
+2. La estación de tierra recibe correctamente los datos que le envía el controlador y los muestra en gráficas dinámicas apropiadas.
+3. Las gráficas dinámicas están incrustadas en la interfaz gráfica.
+4. Las gráficas también muestran la evolución del valor medio de las últimas 10 temperaturas.
+5. El usuario puede elegir dónde deben calcularse las medias de las 10 últimas temperaturas (si en el satélite o en tierra).
+6. El usuario puede parar/reanudar el envío de los datos de humedad/temperatura y el envio de datos de distancia.
+7. El usuario puede cambiar el periodo de envío de datos de temperatura/humedad y de distancia.
+8. El controlador avisa correctamente a la estación de tierra en el caso de que no pueda captar bien los datos de temperatura/humedad o los datos de distancia (por ejemplo, porque se han desconectado los sensores).
+9. La estación de tierra detecta un fallo en la comunicación con el controlador y avisa al usuario de esta circunstancia.
+10. El usuario puede poner al sensor de distancia en modo rastreo (hace un barrido continuo de toda la zona alrededor del satelite) y también puede establecer una orientación determinada para el sensor.
+11. El usuario puede establecer el valor máximo de temperatura que hará que salte una alarma si se reciben tres valores medios seguidos por encima de ese valor máximo.
+12. El usuario de la estación de tierra no tiene ninguna duda de como interactuar con la interfaz gráfica ni para interpretar correctamente la información que se muestra en consola (tanto los datos como las alarmas)
+13. El código está bien estructurado e indentado. Es fácil localizar en que parte del código que hace cada una de las operaciones de la versión 1.
+14. Se han añadido comentarios clarificadores. En particular, hay comentarios que describen claramente el protocolo de aplicación. Cada función tiene un comentario que describe lo que hace, qué parámetros tiene y qué resultado produce.
+15. Se ha implementado correctamente una cola circular para facilitar el cálculo de la media de los últimos 10 valores de temperatura.
+
+La entrega de la versión 2 tiene dos partes. Por una parte debe entregarse un fichero comprimido con los códigos, que debe incluir:   
+
+* El código del Arduino satélite
+* El código del Arduino de tierra
+* El código de la interfaz gráfica
+* En una carpeta adicional: los códigos de los test unitarios que hayais preparado.   
+
+Por otra parte debe entregarse un vídeo de no más de 5 minutos que muestre el correcto funcionamiento de los elementos del sistema que son novedad en la versión 2 (y, por tanto, no se mostraron en el vídeo de la versión 1). También debe mostrar las partes del código implicadas en las nuevas funcionalidades. 
+
+## 6. Versión 3
+Las novedades principales de la versión 3 son: un sistema de detección de errores en la comunicación, el envío por parte del satélite de datos sobre su posición que se mostrarán en una gráfica apropiada, la implementación de un sistema de comunicación inalámbrica entre el satélite y la estación de tierra y la implementación de un sistema de registro de eventos.    
+
+### 6.1 Detección de errores en la comunicación
+El enlace de comunicación entre el satélite y la estación de tierra puede tener fallos (por ejemplo, bits que se pierden o cambian de valor por el camino). No estamos hablando por tanto de que se haya interrumpido la comunicación (para lo cual ya tenemos un sistema de alarma) sino de un problema de corrupción en el contenido del mensaje. Es necesario incorporar al sistema de algún mecanismo que permita detectar que se ha producido un error y que el mensaje recibido debe ignorarse.   
+
+Un sistema ampliamente usado consiste en añadir al mensaje un checksum. Se trata de un byte que se añade al final del mensaje y que se calcula haciendo la suma de todos los bytes del mensaje y truncando el resultado para que quepa en un byte. El programa transmisor calcula el checksum, lo añade al final del mensaje y lo envía todo.  El programa receptor separa el checksum del mensaje, recalcula el checksum y verifica que coincide con el valor que venía en el mensaje. Si el mensaje ha sufrido alteraciones durante el viaje los valores no van a coincidir y, por tanto, el mensaje debe descartarse.   
+
+Implementad en vuestro sistema un mecanismo de checksum que permita descartar los mensajes que han sufrido alteraciones durante la transmisión.   
+
+### 6.2 Posición del satélite
+### 6.3 Comunicación inalámbrica
+### 6.4 Registro de eventos
+El sistema debe mantener un registro de eventos que pueda ser consultado fácilmente por el usuario. Deben considerarse al menos tres tipos de eventos:   
+ 
+* Comandos que envía la estación de tierra al satélite (por ejemplo, "detener envío de temperatura")   
+* Alarmas (por ejemplo, "mensaje corrupto" o "temperatura excesiva")   
+* Observaciones del usuario (por ejemplo, "salgo un momento a comer")
+
+Para cada evento queremos tener:   
+* Dia/hora en el que se ha producido
+* Tipo de evento (uno de los tres anteriores)
+* Descripción
+
+Para el caso de los eventos de tipo "Observaciones del usuario" la interfaz gráfica debe tener los elementos necesarios para que el usuario pueda introducir sus observaciones.   
+ 
+Los eventos deben guardarse en un fichero de texto, para que no se pierdan al cerrar la aplicación. Además, la interfaz gráfica debe permitir consultar cómodamente los eventos, filtrandolos por dia/hora y por tipo de evento.    
+
+
+
 
   
 
