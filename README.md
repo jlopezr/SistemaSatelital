@@ -647,6 +647,13 @@ Implementad en vuestro sistema un mecanismo de checksum que permita descartar lo
 
 ### 6.2 Posición del satélite
 ### 6.3 Comunicación inalámbrica
+En las versiones anteriores la comunicación entre el Arduino satélite y el Arduino tierra se ha hecho, por comodidad, por cable, usando el protocolo UART de comunicación serie. Pero como es lógico, en el sistema final la comunicación debe realizarse de forma inalambrica. En esta versión 3 vamos a experimentar ya con esta comunicación inalambrica, para lo cual usaremos la tecnología LoRa (Long Range) que está diseñado para comunicaciones a gran distancia y con poco consumo de energía que es justo lo que necesitamos para la comunicación con satélites. En el proyecto usaremos el kit LoRa que usa el chip SX1276 (hay otros modelos cuyo funcionamiento puede ser diferente).   
+
+La comunicación usando LoRa también es una comunicación serie que utiliza el protocolo UART. Los programas de los Arduinos deben crear un canal de comunicación usando la librería _SoftwareSerial_ exactamente igual que hasta ahora. Eso implica que el uso de LoRa no implica ningún cambio en el código de los programas. Eso sí, es necesario incorporar los elementos hardware del kit, que es lo que resumimos a continuación.   
+
+El transmisor/receptor LoRa debe conectarse al Arduino tal y como muestra la figura.    
+Como puede observarse, el pin 4 de LoRa debe conectarse al pin 11 de Arduino (el TX del canal de comunicación). Por otra parte, el pin 5 de LoRa se conecta al pin 10 del Arduino (el RX), pero pasando primero por un divisor de tensión. 
+
 ### 6.4 Registro de eventos
 El sistema debe mantener un registro de eventos que pueda ser consultado fácilmente por el usuario. Deben considerarse al menos tres tipos de eventos:   
  
