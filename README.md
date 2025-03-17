@@ -695,8 +695,10 @@ Veamos un ejemplo. Supongamos que tenemos que enviar un mensaje que contiene 4 d
 * El dato C (un número entre 0 y 31)   
 * El dato D (un número entre 0 y 7)   
   
-Esta información podría enviarse en forma de cadena de caracteres: “2/3/5/22/6”. Esta cadena ocupa 10 bytes, que son los que se necesitan para codificar en ASCII cada uno de los 10 caracteres de la cadena. Sin embargo, atendiendo al tamaño que pueden tener cada uno de los 4 datos, podríamos codificar el mensaje en 2 bytes, tal y como muestra la figura.
- 
+Esta información podría enviarse en forma de cadena de caracteres: “2/3/5/22/6”. Esta cadena ocupa 10 bytes, que son los que se necesitan para codificar en ASCII cada uno de los 10 caracteres de la cadena. Sin embargo, atendiendo al tamaño que pueden tener cada uno de los 4 datos, podríamos codificar el mensaje en 2 bytes, tal y como muestra la figura.   
+    
+ <img  src="https://github.com/user-attachments/assets/8f018e20-0158-4dd6-bfce-535b40f8d015" width="400" height="100"/>    
+  
 Puesto que el código se puede codificar con 2 bits, los valores de A, B y D se pueden codificar con 3 bits y el valor de C se puede codificar con 5 bits, un total de 16 bits (2 bytes) son suficientes para codificar el mensaje completo, frente a los 10 bytes del mensaje en forma de cadena e caracteres.    
  
 Para poder hacer las operaciones de compactación y des-compactación de los mensajes es necesario aprender a trabajar a nivel de bit (máscaras, desplazamientos, AND y OR). Veamos lo esencial sobre esta cuestión.    
