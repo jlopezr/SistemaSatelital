@@ -656,7 +656,7 @@ Como puede observarse, el pin 4 de LoRa debe conectarse al pin 11 de Arduino (el
 
 
 REVISAR ESTO PORQUE TENEMOS UN LIO CON LAS CONEXIONES
-<img  src="https://github.com/user-attachments/assets/8c1b5643-1d2e-4521-b131-01f6a05b5d13" width="400" height="100"/>   
+<img  src="https://github.com/user-attachments/assets/8c1b5643-1d2e-4521-b131-01f6a05b5d13" width="400" height="150"/>   
 
 ### 6.4 Registro de eventos
 El sistema debe mantener un registro de eventos que pueda ser consultado fácilmente por el usuario. Deben considerarse al menos tres tipos de eventos:   
