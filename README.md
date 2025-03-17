@@ -652,7 +652,11 @@ En las versiones anteriores la comunicación entre el Arduino satélite y el Ard
 La comunicación usando LoRa también es una comunicación serie que utiliza el protocolo UART. Los programas de los Arduinos deben crear un canal de comunicación usando la librería _SoftwareSerial_ exactamente igual que hasta ahora. Eso implica que el uso de LoRa no implica ningún cambio en el código de los programas. Eso sí, es necesario incorporar los elementos hardware del kit, que es lo que resumimos a continuación.   
 
 El transmisor/receptor LoRa debe conectarse al Arduino tal y como muestra la figura.    
-Como puede observarse, el pin 4 de LoRa debe conectarse al pin 11 de Arduino (el TX del canal de comunicación). Por otra parte, el pin 5 de LoRa se conecta al pin 10 del Arduino (el RX), pero pasando primero por un divisor de tensión. 
+Como puede observarse, el pin 4 de LoRa debe conectarse al pin 11 de Arduino (el TX del canal de comunicación). Por otra parte, el pin 5 de LoRa se conecta al pin 10 del Arduino (el RX), pero pasando primero por un divisor de tensión.   
+
+
+REVISAR ESTO PORQUE TENEMOS UN LIO CON LAS CONEXIONES
+<img  src="https://github.com/user-attachments/assets/8c1b5643-1d2e-4521-b131-01f6a05b5d13" width="400" height="100"/>   
 
 ### 6.4 Registro de eventos
 El sistema debe mantener un registro de eventos que pueda ser consultado fácilmente por el usuario. Deben considerarse al menos tres tipos de eventos:   
