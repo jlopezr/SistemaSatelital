@@ -538,11 +538,13 @@ La entrega de la versión 1 tiene dos partes. Por una parte debe entregarse un f
 * El código de la interfaz gráfica
 * En una carpeta adicional: los códigos de los test unitarios que hayais preparado.   
 
-Por otra parte debe entregarse un vídeo de no más de 5 minutos que muestre el correcto funcionamiento del sistema (es decir, todo lo que indica la tabla anterior) y además muestre las partes más relevantes de los tres códigos, con énfasis especial en los códigos que no han sido producto de cortar de esta guía y pegar (por ejemplo, los códigos para incrustar la gráfica en la interfaz gráfica o para implementar las alarmas).  La forma en entregar el vídeo es colocar la url (de youtube o google drive) correspondiente en el campo Observaciones de la tarea en la que se ha entregado el código.
+Por otra parte debe entregarse un vídeo de no más de 5 minutos que muestre el correcto funcionamiento del sistema (es decir, todo lo que indica la tabla anterior) y además muestre las partes más relevantes de los tres códigos, con énfasis especial en los códigos que no han sido producto de cortar de esta guía y pegar (por ejemplo, los códigos para incrustar la gráfica en la interfaz gráfica o para implementar las alarmas). Para mostrar el sistema en funcionamiento probablemente tendréis que hacer un vídeo compuesto por una captura de escritorio en la que se vea la aplicación en funcionamiento y otro vídeo sincronizado con este en el que vea el hardware en acción. La forma en entregar el vídeo es colocar la url (de youtube o google drive) correspondiente en el campo Observaciones de la tarea en la que se ha entregado el código.
 
 HACEMOS QUE MANTENGAN UN REPOSITORIO EN GITHUB CON LAS DIFERENTES VERSIONES DEL PROYECTO Y QUE NOS VAYAN ENTREGANDO LA URL?
  
 ## 5. Versión 2
+En la versión 2 vamos a incorporar al sistema un sensor de distancia que nos permitirá detectar la proximidad al satélite de objetos que puedan impactar con él. Además, añadiremos algo de computación para cálculo de medias de temperaturas.   
+ 
 La versión 2 del proyecto está mucho menos guiada que la version 1. Además, empezará ya a ser necesario identificar tareas que puedan repartirse entre los miembros del grupo, para luego integrar los resultados y verificar el correcto funcionamiento de todo junto. En los apartados siguientes se describen los requisitos de la versión 2 y se dan algunas pautas que pueden ayudar a su implementación.    
  
 ### Protocolo de aplicación
@@ -579,6 +581,25 @@ if (codigo == 1){
     .....
 ```
 Tomad ya en el equipo las decisiones básicas para vuestro protocolo de aplicación, haciendo una previsión del tipo de mensajes que se van a tener que enviar de un sitio a otro en esta versión 2.
+
+### Cálculo de medias de temperatura
+Debe incorporarse a las gráficas que se muestran al usuario una que presente la evolución en el tiempo del valor medio de los 10 últimos valores de temperatura. Además, el sistema debe mostrar una alarma al usuario en el caso de que se detecten tres valores medios consecutivos superiores a un valor límite especificado por el usuario.    
+
+El cálculo de esos valores medios puede realizarse en el satélite o en tierra. La ventaja de hacerlo en el satélite es que el sistema puede reaccionar inmediatamente en caso de situación de alarma, por ejemplo, activando un sistema de refrigeración. El inconveniente es que ese cálculo en el satélite consume energía, lo cual no es nada conveniente si el satélite debe estar operativo por un largo periodo de tiempo. El cálculo de los valores medios en tierra tiene justamente las ventajas e inconvenientes contrarios: el gasto de energía para el cálculo es más asumible en tierra pero el sistema no puede reaccionar de manera inmediata a la situación de alarma.   
+
+Se desea, por tanto, que el usuario puede elegir dónde se hace el cálculo de valores medios, si los hace el Arduino satélite (con lo cual esos valores habrá que enviarlos también a tierra) o si los hace la aplicación Python.   
+
+### Sensor de distancia
+El satélite debe estar dotado de un sistema que permita detectar la proximidad de objetos que puedan impactar con él. Para implementar este sistema usaremos el sensor ultrasónico HC-SR04.    
+
+Este sensor emite un sonido ultrasónico por uno de sus transductores y esperar que el sonido rebote de algún objeto presente. El eco es captado por el segundo transductor. La distancia es proporcional al tiempo que tarda en llegar el eco. Os resultara muy fácil encontrar información sobre cómo conectar el sensor al Arduino satélite y cómo capturar por programa los valores que proporciona.   
+
+Naturalmente el sensor emite el sonido en la dirección en la que está orientado. Para que el sistema sea operativo es necesario que esa orientación pueda cambiar para detectar la proximidad de objetos peligrosos en cualquier dirección. Para conseguir esto montaremos el sensor de ultrasonidos en un servo motor que podemos hacer girar a voluntad por programa. Idealmente, el programa del Arduino satelite hará girar el servo motor de manera constante para conseguir un barrido de toda la zona y captar así la proximidad de objetos en toda la zona barrida. Los datos captados se enviarán a tierra para que puedan mostrarse al usuario.   
+
+La forma ideal para mostrar los datos del sensor de ultrasonidos es una gráfica tipo radar como la que se muestra en la imagen siguiente.    
+
+Finalmente, conviene que desde la estación de tierra se pueda dar la orden al satélite para que oriente el sensor en una dirección concreta en la que se aprecia un mayor peligro.    
+
 
 Tomar datos del sensor de distancia 
 Montar el sensor de distancia en un servo motor para orientarlo
