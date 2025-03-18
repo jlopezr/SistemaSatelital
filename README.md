@@ -657,12 +657,14 @@ En las versiones anteriores la comunicación entre el Arduino satélite y el Ard
 La comunicación usando LoRa también es una comunicación serie que utiliza el protocolo UART. Los programas de los Arduinos deben crear un canal de comunicación usando la librería _SoftwareSerial_ exactamente igual que hasta ahora. Eso implica que el uso de LoRa no implica ningún cambio en el código de los programas. Eso sí, es necesario incorporar los elementos hardware del kit, que es lo que resumimos a continuación.   
 
 El transmisor/receptor LoRa debe conectarse al Arduino tal y como muestra la figura.    
-Como puede observarse, el pin 4 de LoRa debe conectarse al pin 11 de Arduino (el TX del canal de comunicación). Por otra parte, el pin 5 de LoRa se conecta al pin 10 del Arduino (el RX), pero pasando primero por un divisor de tensión.   
 
+<img  src="https://github.com/user-attachments/assets/fa49ade5-4acd-49a0-89ca-db71a19a6d10" width="400" height="150"/>   
+Como puede observarse, el pin 5 de LoRa (TXD) debe conectarse al pin 10 de Arduino (el RX del canal de comunicación). Por otra parte, el pin 4 de LoRa (RXD) debe conectarse a un divisor de tensión que a su vez se conecta al pin 11 de Arduino (TX del canal de comunicación). Esto se debe a que el chip LoRa trabaja con un voltaje de 3.3V (Arduino trabaja con 5V). Que Arduino reciba por RX la señal de solo 3.3V que le envía LoRa no es problema porque Arduino puede interpretarla bien. Pero que LoRa reciba por RXD una señal de 5V del TX de Arduino puede causar un mal funcionamiento del chip. Por eso, la señal  TX de Arduino (pin 11) se pasa por el divisor de tensión que hace que esos 5V se reduzcan en una tercera parte, de manera que lo que llega a LoRa es aproximandamente esos 3.3V que necesita.   
 
-REVISAR ESTO PORQUE TENEMOS UN LIO CON LAS CONEXIONES
-<img  src="https://github.com/user-attachments/assets/8c1b5643-1d2e-4521-b131-01f6a05b5d13" width="400" height="150"/>   
+Conectando los chips LoRa de la forma indicada en ambos Arduinos las comunicaciones deberían funcionar sin problema y sin cambiar nada en el código.   
 
+HABLAS DE LAS INTERFERENCIAS
+ 
 ### 6.4 Registro de eventos
 El sistema debe mantener un registro de eventos que pueda ser consultado fácilmente por el usuario. Deben considerarse al menos tres tipos de eventos:   
  
