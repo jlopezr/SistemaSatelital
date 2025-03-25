@@ -641,16 +641,14 @@ Las novedades principales de la versión 3 son: un sistema de detección de erro
 ### 6.1 Detección de errores en la comunicación
 El enlace de comunicación entre el satélite y la estación de tierra puede tener fallos (por ejemplo, bits que se pierden o cambian de valor por el camino). No estamos hablando por tanto de que se haya interrumpido la comunicación (para lo cual ya tenemos un sistema de alarma) sino de un problema de corrupción en el contenido del mensaje. Es necesario incorporar al sistema de algún mecanismo que permita detectar que se ha producido un error y que el mensaje recibido debe ignorarse.   
 
-Un sistema ampliamente usado consiste en añadir al mensaje un checksum. Se trata de un byte que se añade al final del mensaje y que se calcula haciendo la suma de todos los bytes del mensaje y truncando el resultado para que quepa en un byte. El programa transmisor calcula el checksum, lo añade al final del mensaje y lo envía todo.  El programa receptor separa el checksum del mensaje, recalcula el checksum y verifica que coincide con el valor que venía en el mensaje. Si el mensaje ha sufrido alteraciones durante el viaje los valores no van a coincidir y, por tanto, el mensaje debe descartarse.   
+Un sistema ampliamente usado consiste en añadir al mensaje un checksum. Se trata de un byte que se añade al final del mensaje y que se calcula haciendo la suma de todos los bytes del mensaje y truncando el resultado para que quepa en un byte. El programa transmisor calcula el checksum, lo añade al final del mensaje y lo envía todo.  El programa receptor separa el checksum del mensaje, recalcula el checksum y verifica que coincide con el valor que venía en el mensaje. Si el mensaje ha sufrido alteraciones durante el viaje los valores no van a coincidir y, por tanto, el mensaje debe descartarse. Para probar el correcto funcionamiento de este mecanismo conviere idear alguna manera de alterar el mensaje en el satélite, después de haber calculado su checksum y antes de que el mensaje sea transmitido.       
 
 Implementad en vuestro sistema un mecanismo de checksum que permita descartar los mensajes que han sufrido alteraciones durante la transmisión.   
 
 ### 6.2 Posición del satélite    
+ESTA POR HACER. TRASLADAR AQUI EL CONTENIDO DE LA GUIA QUE SE PREPARÓ EN SU MOMENTO
+QUIZA PODEMOS PONER EN EL REPOSITORIO LOS CÓDIGOS PARA EL ARDUINO Y PARA LA ESTACION DE TIERRA, QUE ESTABAN EN LA GUIA.
 
-Lamentablemente no podemos enviar nuestra Arduino al espacio (todavia) pero si podemos programarla
-para que simule el movimiento de un satelite en orbita. Para esta primera versión de la simulación,
-asumiremos que el satelite realiza una orbita circular alrededor de la tierra a una altura constante
-en el plano ecuatorial.
 ### 6.3 Comunicación inalámbrica
 En las versiones anteriores la comunicación entre el Arduino satélite y el Arduino tierra se ha hecho, por comodidad, por cable, usando el protocolo UART de comunicación serie. Pero como es lógico, en el sistema final la comunicación debe realizarse de forma inalambrica. En esta versión 3 vamos a experimentar ya con esta comunicación inalambrica, para lo cual usaremos la tecnología LoRa (Long Range) que está diseñado para comunicaciones a gran distancia y con poco consumo de energía que es justo lo que necesitamos para la comunicación con satélites. En el proyecto usaremos el kit LoRa que usa el chip SX1276 (hay otros modelos cuyo funcionamiento puede ser diferente).   
 
@@ -681,6 +679,38 @@ Para el caso de los eventos de tipo "Observaciones del usuario" la interfaz grá
  
 Los eventos deben guardarse en un fichero de texto, para que no se pierdan al cerrar la aplicación. Además, la interfaz gráfica debe permitir consultar cómodamente los eventos, filtrandolos por dia/hora y por tipo de evento.    
 
+### 6.5 Entrega de la versión 3   
+La lista siguiente es un resumen de lo que debería estar funcionando en la versión 3.
+ 
+1. El controlador capta correctamente los datos de humedad, temperatura, distancia y posición del satélite.
+2. La estación de tierra recibe correctamente los datos que le envía el controlador y los muestra en gráficas dinámicas apropiadas (incluida la gráfica 2D con la posición del satélite).
+3. Las gráficas dinámicas están incrustadas en la interfaz gráfica.
+4. Las gráficas también muestran la evolución del valor medio de las últimas 10 temperaturas.
+5. El usuario puede elegir dónde deben calcularse las medias de las 10 últimas temperaturas (si en el satélite o en tierra).
+6. El usuario puede parar/reanudar el envío de los datos de humedad/temperatura, el envio de datos de distancia y el envío de la posición del satélite.
+7. El usuario puede cambiar el periodo de envío de datos de temperatura/humedad, de distancia y de posición.
+8. El controlador avisa correctamente a la estación de tierra en el caso de que no pueda captar bien los datos de temperatura/humedad o los datos de distancia (por ejemplo, porque se han desconectado los sensores).
+9. La estación de tierra detecta un fallo en la comunicación con el controlador y avisa al usuario de esta circunstancia.
+10. El usuario puede poner al sensor de distancia en modo rastreo (hace un barrido continuo de toda la zona alrededor del satelite) y también puede establecer una orientación determinada para el sensor.
+11. El usuario puede establecer el valor máximo de temperatura que hará que salte una alarma si se reciben tres valores medios seguidos por encima de ese valor máximo.
+12. El usuario puede introducir en el sistema texto con sus observaciones en cualquier momento.
+13. El sistema registra en ficheros los 3 tipos de eventos (alarmas, comandos y observaciones).
+14. El usuario puede consultar en cualquier momento los eventos registrados, filtrando por dia y por tipo de evento.
+15. El sistema funciona correctamente al sustituir la comunicación por cable por la comunicación inalámbrica.
+16. El sistema de comunicaciones usa el mecanismo de checksum para detectar alteraciones en el mensaje.
+17. El usuario de la estación de tierra no tiene ninguna duda de como interactuar con la interfaz gráfica ni para interpretar correctamente la información que se muestra en consola (tanto los datos como las alarmas)
+18. El código está bien estructurado e indentado. Es fácil localizar en que parte del código que hace cada una de las operaciones de la versión 1.
+19. Se han añadido comentarios clarificadores. En particular, hay comentarios que describen claramente el protocolo de aplicación. Cada función tiene un comentario que describe lo que hace, qué parámetros tiene y qué resultado produce.
+20. Se ha implementado correctamente una cola circular para facilitar el cálculo de la media de los últimos 10 valores de temperatura.
+
+Como en los casos anteriores, la entrega de la versión 3 tiene dos partes. Por una parte debe entregarse un fichero comprimido con los códigos, que debe incluir:   
+
+* El código del Arduino satélite
+* El código del Arduino de tierra
+* El código de la interfaz gráfica
+* En una carpeta adicional: los códigos de los test unitarios que hayais preparado.   
+
+Por otra parte debe entregarse un vídeo de no más de 5 minutos que muestre el correcto funcionamiento de los elementos del sistema que son novedad en la versión 3 (y, por tanto, no se mostraron en el vídeo de la versión 2). También debe mostrar las partes del código implicadas en las nuevas funcionalidades. 
 
 
 ## 7. Versión 4 (final)
@@ -840,4 +870,5 @@ No te va a resultar difícil porque en vuestro sistema los mensajes que intercam
 Solo hay un punto que ha quedado en el aire. ¿Cómo está segura, por ejemplo, la estación de tierra, de que la clave pública que le han dado es realmente de su satélite y no de un satélite espía? En otras palabras, ¿dónde está la autoridad certificadora en este caso (la que haga el papel que hizo Correos en el caso de la historia de Juan y Maria)? En este caso, la autoridad certificadora podría ser los profesores de la asignatura. Ellos serían los que proporcionarían los juegos de claves públicas y privadas, asegurándose de que entregan esas claves a las personas que son quienes dicen que son. Naturalmente, a los profesores les costaría medio segundo hacer ese programa para generar las claves. No obstante, vamos a obviar ese paso, porque vuestros profesores están muy ocupados revisando las entregas del curso. A menos que estéis dispuestos a pagarles 100 euros por ese servicio, como hicieron María y Juan con Correos. En ese caso, quizá vuestros profesores estén dispuestos a hablar del tema.
 
 ### 7.3 Graficos de posición más realistas
+ESTA POR HACER
 
