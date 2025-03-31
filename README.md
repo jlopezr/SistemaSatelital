@@ -872,3 +872,17 @@ Solo hay un punto que ha quedado en el aire. ¿Cómo está segura, por ejemplo, 
 ### 7.3 Graficos de posición más realistas
 ESTA POR HACER
 
+### 7.4 Calificación    
+La versión final si que tiene una calificación (la misma para todos los miembros del equipo) que se determinará a partir de los criterios siguientes:    
+   
+| Criterio  | Descripción | Peso |
+| ------------- | -------------  | ------------- |
+| Correcto |El prototipo realiza correctamente todas las funciones especificadas en los requisitos de la versión 3  |40% 
+| Robusto |El sistema resiste sin bloquearse los fallos que puedan producirse (por ejemplo, errores del usuario al interactuar con el sistema o fallos en los sensores del satélite) |7.5% |
+| Amigable |El usuario no tiene dudas al interactuar con el sistema a través de la interfaz gráfica, que es, además, visualmente agradable.  |7.5% |
+| Organizado y documentado	 |El código del controlador y de la estación de tierra está bien organizado en funciones. Además, se han añadido comentarios adecuados que deben permitir a otras personas, con poco esfuerzo, entender el código y hacer modificaciones si son necesarias	  |10% |
+| Eficiente |El código usa siempre los algoritmos más adecuados para realizar las operaciones  |5% |
+| Sorprendente |Las funcionalidades adicionales son interesantes, complejas y sorprendentes.	  |20% |
+| Bien presentado	 |El vídeo que acompaña a la versión final presenta claramente el funcionamiento del sistema y resulta espectacular  |10% |
+| TOTAL |  |100% |
+
