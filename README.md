@@ -715,7 +715,9 @@ Si observamos el codigo veremos que cada MILLIS_BETWEEN_UPDATES milisegundos se 
 
 La posición se calcula en coordenadas polares y se convierte a coordenadas cartesianas x,y,z. El eje de coordenadas esta posicionado en el centro de la tierra, el eje x apunta hacia el ecuador, el eje y apunta hacia el meridiano de Greenwich y el eje z apunta hacia el polo norte.
 
-Las coordenadas calculadas se envian por el puerto serie para ser visualizadas en el ordenador, segun el formato: Time: 0 s | Position: (X: 6371000 m, Y: 0 m, Z: 400000 m).
+Las coordenadas calculadas se envian por el puerto serie para ser visualizadas en el ordenador, segun el formato: 
+
+`Time: 0 s | Position: (X: 6371000 m, Y: 0 m, Z: 400000 m).`
 
 Una orbita a 400 km de altura tarda aproximadamente 90 minutos en completarse. Para acelerar la simulación se ha añadido un factor de compresión de tiempo de 90x, con lo cual una orbita completa se simula en poco más de un minuto.
 
