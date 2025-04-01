@@ -646,8 +646,212 @@ Un sistema ampliamente usado consiste en añadir al mensaje un checksum. Se trat
 Implementad en vuestro sistema un mecanismo de checksum que permita descartar los mensajes que han sufrido alteraciones durante la transmisión.   
 
 ### 6.2 Posición del satélite    
-ESTA POR HACER. TRASLADAR AQUI EL CONTENIDO DE LA GUIA QUE SE PREPARÓ EN SU MOMENTO
-QUIZA PODEMOS PONER EN EL REPOSITORIO LOS CÓDIGOS PARA EL ARDUINO Y PARA LA ESTACION DE TIERRA, QUE ESTABAN EN LA GUIA.
+
+Hasta ahora hemos aprendido a interactuar con los sensores y actuadores en Arduino, a transmitir información desde el satelite hasta la estanción de tierra y viceversa. Lamentablemente no podemos enviar nuestra Arduino al espacio (todavia) pero si podemos programarla para que simule el movimiento de un satelite en orbita. Para esta primera versión de la simulación, asumiremos que el satelite realiza una orbita circular alrededor de la tierra a una altura constante en el plano ecuatorial.
+
+#### Simulador de movimiento orbital en Arduino
+
+```c
+// Constants
+const double G = 6.67430e-11;  // Gravitational constant (m^3 kg^-1 s^-2)
+const double M = 5.97219e24;   // Mass of Earth (kg)
+const double R_EARTH = 6371000;  // Radius of Earth (meters)
+const double ALTITUDE = 400000;  // Altitude of satellite above Earth's surface (meters)
+const double EARTH_ROTATION_RATE = 7.2921159e-5;  // Earth's rotational rate (radians/second)
+const unsigned long MILLIS_BETWEEN_UPDATES = 1000; // Time in milliseconds between each orbit simulation update
+const double  TIME_COMPRESSION = 90.0; // Time compression factor (90x)
+
+// Variables
+unsigned long nextUpdate; // Time in milliseconds when the next orbit simulation update should occur
+double real_orbital_period;  // Real orbital period of the satellite (seconds)
+double r;  // Total distance from Earth's center to satellite (meters)
+
+void setup() {
+    Serial.begin(9600);
+    nextUpdate = MILLIS_BETWEEN_UPDATES;
+    
+    r = R_EARTH + ALTITUDE;
+    real_orbital_period = 2 * PI * sqrt(pow(r, 3) / (G * M));
+}
+
+void loop() {
+    unsigned long currentTime = millis();
+    if(currentTime>nextUpdate) {
+        simulate_orbit(currentTime, 0, 0);
+        nextUpdate = currentTime + MILLIS_BETWEEN_UPDATES;
+    }
+    // Other code here
+}
+
+void simulate_orbit(unsigned long millis, double inclination, int ecef) {
+    double time = (millis / 1000) * TIME_COMPRESSION;  // Real orbital time
+    double angle = 2 * PI * (time / real_orbital_period);  // Angle in radians
+    double x = r * cos(angle);  // X-coordinate (meters)
+    double y = r * sin(angle) * cos(inclination);  // Y-coordinate (meters)
+    double z = r * sin(angle) * sin(inclination);  // Z-coordinate (meters)
+
+    if (ecef) {
+        double theta = EARTH_ROTATION_RATE * time;
+        double x_ecef = x * cos(theta) - y * sin(theta);
+        double y_ecef = x * sin(theta) + y * cos(theta);
+        x = x_ecef;
+        y = y_ecef;
+    }
+
+    // Send the data to the serial port
+    Serial.print("Time: ");
+    Serial.print(time);
+    Serial.print(" s | Position: (X: ");
+    Serial.print(x);
+    Serial.print(" m, Y: ");
+    Serial.print(y);
+    Serial.print(" m, Z: ");
+    Serial.print(z);
+    Serial.println(" m)");
+}
+```
+
+Si observamos el codigo veremos que cada MILLIS_BETWEEN_UPDATES milisegundos se llama a la función simulate_orbit que calcula la posición del satelite en función del tiempo.
+
+La posición se calcula en coordenadas polares y se convierte a coordenadas cartesianas x,y,z. El eje de coordenadas esta posicionado en el centro de la tierra, el eje x apunta hacia el ecuador, el eje y apunta hacia el meridiano de Greenwich y el eje z apunta hacia el polo norte.
+
+Las coordenadas calculadas se envian por el puerto serie para ser visualizadas en el ordenador, segun el formato: Time: 0 s | Position: (X: 6371000 m, Y: 0 m, Z: 400000 m).
+
+Una orbita a 400 km de altura tarda aproximadamente 90 minutos en completarse. Para acelerar la simulación se ha añadido un factor de compresión de tiempo de 90x, con lo cual una orbita completa se simula en poco más de un minuto.
+
+Si cargamos el código en nuestra Arduino y abrimos el monitor serie, veremos las coordenadas que simulan como el satelite se mueve en orbita alrededor de la tierra.
+
+NOTA: Fijaros que para esta versión de la simulación, el satelite se mueve en un plano fijo (la Z siempre es 0) y no se tiene en cuenta la rotación de la tierra.
+
+#### Visualización en Python
+
+Para visualizar la orbita del satelite en Python, podemos utilizar la libreria pyserial para leer los datos enviados por la Arduino y la libreria matplotlib para dibujar un gráfico 3D de la orbita. Para esta primera versión no utilizaremos la comunicación por radio LoRa, sino que conectaremos la Arduino directamente al ordenador mediante un cable USB. Esto es asi para simplificar la comunicación y centrarnos en la visualización de la orbita. Obviamente cuando tengamos esta parte funcionando, podremos añadir la comunicación LoRa.
+
+```python
+import sys
+import matplotlib.pyplot as plt
+import re
+import matplotlib
+
+# Use TkAgg backend for interactive plotting
+matplotlib.use('TkAgg')
+
+# Regular expression to extract the X, Y, and Z coordinates from the input
+regex = re.compile(r"Position: \(X: ([\d\.-]+) m, Y: ([\d\.-]+) m, Z: ([\d\.-]+) m\)")
+
+# Initialize lists to store the X, Y coordinates for plotting
+x_vals = []
+y_vals = []
+
+# Constants
+R_EARTH = 6371000  # Radius of Earth in meters
+
+# Set up the plot
+plt.ion()  # Turn on interactive mode for dynamic updates
+fig, ax = plt.subplots()
+orbit_plot, = ax.plot([], [], 'bo-', label='Satellite Orbit', markersize=2)  # Line for the orbit with smaller markers
+last_point_plot = ax.scatter([], [], color='red', s=50, label='Last Point')  # Scatter plot for the last point
+
+# Draw the Earth's surface as a circle
+earth_circle = plt.Circle((0, 0), R_EARTH, color='orange', fill=False, label='Earth Surface')
+ax.add_artist(earth_circle)
+
+# Set initial plot limits
+ax.set_xlim(-7e6, 7e6)
+ax.set_ylim(-7e6, 7e6)
+ax.set_aspect('equal', 'box')
+ax.set_xlabel('X (meters)')
+ax.set_ylabel('Y (meters)')
+ax.set_title('Satellite Equatorial Orbit (View from North Pole)')
+ax.grid(True)
+ax.legend()
+
+# Flag to indicate if the window is closed
+window_closed = False
+
+# Function to handle window close event
+def on_close(event):
+    global window_closed
+    print("Window closed")
+    plt.close(fig)
+    window_closed = True
+    sys.exit(0)
+
+# Connect the close event to the handler
+fig.canvas.mpl_connect('close_event', on_close)
+
+# Function to draw the Earth's slice at a given Z coordinate
+def draw_earth_slice(z):
+    slice_radius = (R_EARTH**2 - z**2)**0.5 if abs(z) <= R_EARTH else 0
+    earth_slice = plt.Circle((0, 0), slice_radius, color='orange', fill=False, linestyle='--', label='Earth Slice at Z')
+    return earth_slice
+
+# Initialize the Earth's slice
+earth_slice = draw_earth_slice(0)
+ax.add_artist(earth_slice)
+
+# Read form serial port in real-time
+import serial
+ser = serial.Serial('COM4:', 9600, timeout=1)
+
+while not window_closed:
+    if ser.in_waiting <= 0:
+        continue
+    
+    line = ser.readline().decode('utf-8').rstrip()
+
+# Read from standard input in real-time
+#for line in sys.stdin:
+    if window_closed:
+        break
+
+    # Search for the line containing the satellite's position
+    match = regex.search(line)
+    if match:
+        x = float(match.group(1))
+        y = float(match.group(2))
+        z = float(match.group(3))
+
+        print(f"X: {x}, Y: {y}, Z: {z}")
+
+        # Append the new position to the lists
+        x_vals.append(x)
+        y_vals.append(y)
+
+        # Update the plot
+        orbit_plot.set_data(x_vals, y_vals)
+        last_point_plot.set_offsets([[x_vals[-1], y_vals[-1]]])  # Update the last point
+
+        # Remove the old Earth's slice and add the new one
+        earth_slice.remove()
+        earth_slice = draw_earth_slice(z)
+        ax.add_artist(earth_slice)
+
+        # Check if the new point is outside the current limits and update limits if necessary
+        xlim = ax.get_xlim()
+        ylim = ax.get_ylim()
+        if abs(x) > max(abs(xlim[0]), abs(xlim[1])) or abs(y) > max(abs(ylim[0]), abs(ylim[1])):
+            new_xlim = max(abs(xlim[0]), abs(xlim[1]), abs(x)) * 1.1
+            new_ylim = max(abs(ylim[0]), abs(ylim[1]), abs(y)) * 1.1
+            ax.set_xlim(-new_xlim, new_xlim)
+            ax.set_ylim(-new_ylim, new_ylim)
+            # Debugging information
+            print(f"Updated plot limits: xlim={ax.get_xlim()}, ylim={ax.get_ylim()}")
+    
+        plt.draw()
+        fig.canvas.flush_events()  # Force a redraw of the plot
+
+# Show the final plot when the input ends
+plt.ioff()
+plt.show()
+```
+En este código se lee la salida de la Arduino por el puerto serie y se dibuja la orbita del satelite en un gráfico. El gráfico muestra la orbita del satelite en el plano ecuatorial de la tierra visto desde el polo norte. La tierra se representa como un circulo naranja y la orbita del satelite como una linea azul. El ultimo punto de la orbita se representa como un punto rojo.
+
+Para ejecutar este código necesitamos tener instalado Python y las librerias pyserial y matplotlib. Para instalarlas podemos ejecutar `pip install pyserial matplotlib`.
+
+*IMPORTANTE:* Para que este código funcione, necesitamos tener la Arduino conectada al ordenador mediante un cable USB y que el puerto serie sea el mismo que se ha especificado en el código. Recordad que si tenemos abierto el monitor serie de Arduino, NO podremos acceder al puerto serie desde Python, y el programa fallara. Esto es así que Windows solo permite un programa a la vez acceder al puerto serie. Con ocultar la ventana del monitor serie es suficiente para que Python pueda acceder al puerto serie.
+
+
 
 ### 6.3 Comunicación inalámbrica
 En las versiones anteriores la comunicación entre el Arduino satélite y el Arduino tierra se ha hecho, por comodidad, por cable, usando el protocolo UART de comunicación serie. Pero como es lógico, en el sistema final la comunicación debe realizarse de forma inalambrica. En esta versión 3 vamos a experimentar ya con esta comunicación inalambrica, para lo cual usaremos la tecnología LoRa (Long Range) que está diseñado para comunicaciones a gran distancia y con poco consumo de energía que es justo lo que necesitamos para la comunicación con satélites. En el proyecto usaremos el kit LoRa que usa el chip SX1276 (hay otros modelos cuyo funcionamiento puede ser diferente).   
