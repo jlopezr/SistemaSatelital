@@ -527,7 +527,7 @@ El programa del Arduino de tierra tiene que incluir también el código necesari
 
 Implementa estas alarmas y comprueba que funcionan bien, por ejemplo desconectando alguno de los cables del sensor de humedad o alguno de los cables de comunicación entre los dos Arduinos.    
 
-### Entrega de la verión 1
+### Entrega de la versión 1
 Llegados a este punto ya podemos dar por concluida la versión 1 del proyecto. La lista siguiente es un resumen de lo que debería estar funcionando y puede servirte como lista de comprobación (recuerda que el término controlador se usa para referirnos al Arduino satélite).    
  
 1. El controlador capta correctamente los datos de humedad y temperatura.
